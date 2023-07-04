@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 
 class LenseA(nn.Module):
     def __init__(self, n_head, d_model, d_vocab):

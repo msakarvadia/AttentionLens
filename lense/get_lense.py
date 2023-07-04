@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 from lense.lenseA import LenseA
 
 class TransformerAttentionLense(nn.Module):
@@ -17,7 +18,7 @@ class TransformerAttentionLense(nn.Module):
 
         return torch.stack(outs)
 
-def get_lense(n_layers=12, n_head=12, d_model=768, d_vocab=50257, lense_class=LenseA):
+def get_lense(n_layers=1, n_head=12, d_model=768, d_vocab=50257, lense_class=LenseA):
     lense =  TransformerAttentionLense(n_layers,
                                        n_head,
                                        d_model,
