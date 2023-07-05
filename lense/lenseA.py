@@ -38,7 +38,7 @@ class LenseA(nn.Module):
 
         # Sum across the second to last dimension
         summed_output = output_tensors.sum(dim=2)
-        print(summed_output.size())
+        #print(summed_output.size())
 
         return summed_output
 

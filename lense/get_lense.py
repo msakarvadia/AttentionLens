@@ -3,7 +3,11 @@ import torch
 from lense.lenseA import LenseA
 
 class TransformerAttentionLense(nn.Module):
-    #TODO: clean this up, and make it per layer by default 
+    #NOTE (MS): this lense can support many layers
+    # but we will only create one lense per layer at a time
+    # to reduce the amount of memory we use
+    # The attnlense for all layers for gpt2_small is roughly ~5B parameters
+    # 768*50,000 * 12 * 12 (d_model* d_vocab* n_head* n_layer) 
     def __init__(self, n_layers, n_head, d_model, d_vocab, lense_class=LenseA):
         super().__init__()
         self.n_layers = n_layers
