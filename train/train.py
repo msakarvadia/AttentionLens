@@ -104,7 +104,7 @@ for i, data in enumerate(dataloader):
     #update tqdm bar
   progress_bar.update(1)
     
-  #TODO: need to save attn lens in correct location
+#Save attn lens in correct location
 name = "attn_lens_layer_"+str(n_layer)
 torch.save(attn_lens, name)
 #TODO (MS): need to test that lense is useable for model analysis later
