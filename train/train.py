@@ -30,6 +30,7 @@ parser.add_argument("--teacher_checkpoint", default="bert-base-uncased", type=st
 parser.add_argument("--student_checkpoint", default="distilbert-base-uncased", type=str)
 parser.add_argument("--log_file", default="training.log", type=str)
 parser.add_argument("--loss_file", default="training_loss.csv", type=str)
+parser.add_argument("--layer_number", default=0, type=int)
 args = parser.parse_args()
 
 #single device
@@ -50,37 +51,32 @@ model = get_model(device=device)
 
 # do the training one layer at a time to prevent ram from running out
 hook_name = 'result'
-n_layers = 12
 kldiv = torch.nn.KLDivLoss(reduction='batchmean')
 
-#TODO (MS): stop looping over all layers
 #TODO (MS): implement checkpointing
-for n_layer in range(n_layers):
-  print("layer: ", n_layer)
+n_layer = args.layer_number
 
-  #TODO (MS): initialize lense with model unembed matrix
-  lens_param = {'n_head': model.cfg.n_heads, 'd_model': model.cfg.d_model, 'd_vocab': model.cfg.d_vocab, 'lense_class': LenseA}
-  attn_lens = get_lense(n_layers=1, **lens_param).to(device)
+#Initalize lense with model unembed/bias matrix
+lens_param = {'unembed': model.W_U, 'bias': model.b_U, 'n_head': model.cfg.n_heads, 'd_model': model.cfg.d_model, 'd_vocab': model.cfg.d_vocab, 'lense_class': LenseA}
+attn_lens = get_lense(n_layers=1, **lens_param).to(device)
+hook_id = utils.get_act_name(hook_name, n_layer)
+total_steps = 5
+progress_bar = tqdm(range(total_steps))
 
-  hook_id = utils.get_act_name(hook_name, n_layer)
-  total_steps = 5
-  progress_bar = tqdm(range(total_steps))
+for i, data in enumerate(dataloader):
+  if i == total_steps:
+      break
 
-  for i, data in enumerate(dataloader):
-    if i == total_steps:
-        break
+  prompt = data['text']
+  tokens = model.to_tokens(prompt)
 
-    prompt = data['text']
-    tokens = model.to_tokens(prompt)
-
-    with torch.no_grad():
-        logits, cache = model.run_with_cache(tokens, remove_batch_dim=False)
+  with torch.no_grad():
+      logits, cache = model.run_with_cache(tokens, remove_batch_dim=False)
     
-    inputs = []
-    inputs.append(cache[hook_id])
-    input_tensor = torch.stack(inputs)
-
-    # print(input.requires_grad, input.grad_fn)f
+  inputs = []
+  inputs.append(cache[hook_id])
+  input_tensor = torch.stack(inputs)
+   # print(input.requires_grad, input.grad_fn)f
 
     # lens_out = lens(input)
     # print(lens_out.requires_grad)
@@ -89,26 +85,26 @@ for n_layer in range(n_layers):
     #print("input size: ",input_tensor.size())
     #print("logits size: ",logits.size())
 
-    attn_lens_out = attn_lens(input_tensor)
+  attn_lens_out = attn_lens(input_tensor)
 
     #print("attenion lens original output size: ", attn_lens_out.size())
 
-    lens_out = attn_lens_out[0]
+  lens_out = attn_lens_out[0]
     #print("lense output size: ", lens_out.size())
 
     #TODO (MS): are we supposed to log softmax both, or just one of these quantities
-    k_logits, k_lens_out = F.log_softmax(logits, dim=-1), F.log_softmax(lens_out, dim=-1)
+  k_logits, k_lens_out = F.log_softmax(logits, dim=-1), F.log_softmax(lens_out, dim=-1)
 
     #print(k_lens_out.requires_grad)
     #print(k_lens_out.grad_fn)
 
-    loss = kldiv(k_lens_out, k_logits)
-    loss.backward()
+  loss = kldiv(k_lens_out, k_logits)
+  loss.backward()
     
     #update tqdm bar
-    progress_bar.update(1)
+  progress_bar.update(1)
     
   #TODO: need to save attn lens in correct location
-  name = "attn_lens_layer_"+str(n_layer)
-  torch.save(attn_lens, name)
-  #TODO (MS): need to test that lense is useable for model analysis later
+name = "attn_lens_layer_"+str(n_layer)
+torch.save(attn_lens, name)
+#TODO (MS): need to test that lense is useable for model analysis later

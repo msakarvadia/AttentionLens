@@ -7,6 +7,7 @@ def get_data(device, streaming=True, pin_memory=True, batch_size=32, dataset_nam
     # will start loading the data when iterated over
     #data  = load_dataset(dataset_name, split="train", streaming=streaming)  
 
+    #TODO (MS): discuss with team about whether or not to preprocess batches to ensure all items have same length
     data  = load_dataset(dataset_name, 'en', split="train", streaming=streaming)  
     dataloader = DataLoader(data,
                             batch_size=batch_size,
