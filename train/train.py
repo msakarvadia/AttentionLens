@@ -26,10 +26,6 @@ parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int)
 parser.add_argument("--checkpoint_dir", default="/grand/projects/SuperBERT/mansisak/kd_ckpts/", type=str)
-parser.add_argument("--teacher_checkpoint", default="bert-base-uncased", type=str)
-parser.add_argument("--student_checkpoint", default="distilbert-base-uncased", type=str)
-parser.add_argument("--log_file", default="training.log", type=str)
-parser.add_argument("--loss_file", default="training_loss.csv", type=str)
 parser.add_argument("--layer_number", default=0, type=int)
 args = parser.parse_args()
 
@@ -76,32 +72,17 @@ for i, data in enumerate(dataloader):
   inputs = []
   inputs.append(cache[hook_id])
   input_tensor = torch.stack(inputs)
-   # print(input.requires_grad, input.grad_fn)f
-
-    # lens_out = lens(input)
-    # print(lens_out.requires_grad)
-    # print(lens_out.grad_fn)
-
-    #print("input size: ",input_tensor.size())
-    #print("logits size: ",logits.size())
 
   attn_lens_out = attn_lens(input_tensor)
-
-    #print("attenion lens original output size: ", attn_lens_out.size())
-
   lens_out = attn_lens_out[0]
-    #print("lense output size: ", lens_out.size())
 
-    #TODO (MS): are we supposed to log softmax both, or just one of these quantities
+  #TODO (MS): are we supposed to log softmax both, or just one of these quantities
   k_logits, k_lens_out = F.log_softmax(logits, dim=-1), F.log_softmax(lens_out, dim=-1)
-
-    #print(k_lens_out.requires_grad)
-    #print(k_lens_out.grad_fn)
 
   loss = kldiv(k_lens_out, k_logits)
   loss.backward()
     
-    #update tqdm bar
+  #update tqdm bar
   progress_bar.update(1)
     
 #Save attn lens in correct location
