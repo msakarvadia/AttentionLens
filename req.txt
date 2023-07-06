@@ -23,6 +23,7 @@ huggingface-hub          0.15.1
 idna                     3.4
 jaxtyping                0.2.20
 Jinja2                   3.1.2
+lightning-utilities      0.9.0
 lit                      16.0.6
 markdown-it-py           3.0.0
 MarkupSafe               2.1.3
@@ -53,6 +54,7 @@ psutil                   5.9.5
 pyarrow                  12.0.1
 Pygments                 2.15.1
 python-dateutil          2.8.2
+pytorch-lightning        2.0.4
 pytz                     2023.3
 PyYAML                   6.0
 regex                    2023.6.3
@@ -69,6 +71,7 @@ tdqm                     0.0.1
 tokenizers               0.13.3
 torch                    2.0.1
 torchaudio               2.0.2
+torchmetrics             1.0.0
 torchvision              0.15.2
 tqdm                     4.65.0
 transformer-lens         0.0.0

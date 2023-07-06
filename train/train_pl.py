@@ -139,14 +139,21 @@ class LightningLens(pl.LightningModule):
   def configure_optimizers(self):
     optimizer = torch.optim.Adam(self.parameters(), lr=1e-3)
     return optimizer
+  
+  #TODO(MS): register an early stopping call back which quits training if the loss/some metric drops below a certain pont
+  #TODO(MS): when training quits, save a copy of the appropriately named lense
+  #TODO(MS): test and make sure distributed training works accross nodes
 
 #train
 #LLM = get_model()
 model = LightningLens()
 data_module = DataModule()
-trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true')
+trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true',
+                     max_epochs=1,)
+                     #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module)
+#TODO (MS): implement checkpointing
 '''
 #single device
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -167,7 +174,6 @@ dataloader = get_data(streaming=True,
 hook_name = 'result'
 kldiv = torch.nn.KLDivLoss(reduction='batchmean')
 
-#TODO (MS): implement checkpointing
 n_layer = args.layer_number
 
 #Initalize lense with model unembed/bias matrix
