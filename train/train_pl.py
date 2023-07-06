@@ -39,23 +39,27 @@ class LightningLens(pl.LightningModule):
     super().__init__()
 
     #self.model=model
-    self.model = get_model()
-    print("model type: ", type(self.model))
+    #print("init step device: ", self.device)
+    self.base_model = get_model(device=self.device)
     self.hook_name = 'result'
     self.n_layer = 0
     self.hook_id = utils.get_act_name(self.hook_name, self.n_layer)
-    '''
-    # mnist images are (1, 28, 28) (channels, width, height) 
-    self.layer_1 = torch.nn.Linear(28 * 28, 128)
-    self.layer_2 = torch.nn.Linear(128, 256)
-    self.layer_3 = torch.nn.Linear(256, 10)
-    '''
+
     #Initalize lense with model unembed/bias matrix
-    lens_param = {'unembed': self.model.W_U, 'bias': self.model.b_U, 'n_head':self.model.cfg.n_heads, 'd_model': self.model.cfg.d_model, 'd_vocab': self.model.cfg.d_vocab, 'lense_class': LenseA}
+    lens_param = {'unembed': self.base_model.W_U, 'bias': self.base_model.b_U, 'n_head':self.base_model.cfg.n_heads, 'd_model': self.base_model.cfg.d_model, 'd_vocab': self.base_model.cfg.d_vocab, 'lense_class': LenseA}
+
+    #making lense
     self.attn_lens = get_lense(n_layers=1, **lens_param)# .to(device)
    
+  def setup(self, stage):
+    #print("setup step device: ", self.device)
+    #print("setup step work around device: ", self.trainer.strategy.root_device)
+    self.model = get_model(device=self.trainer.strategy.root_device)
+    return
+    
 
   def forward(self, cache):
+      #print("forward step device: ", self.device)
         
       inputs = []
       inputs.append(cache[self.hook_id])
@@ -105,15 +109,19 @@ class LightningLens(pl.LightningModule):
 
   def training_step(self, train_batch, batch_idx):
       #x, y = train_batch
+      #print("train step device: ", self.device)
+      #self.model = get_model(device=self.device)
       prompt = train_batch['text']
       tokens = self.model.to_tokens(prompt)
+      #print('device: ', self.device)
       #print('Tokens device number: ', tokens.get_device())
       #print('LLM device number: ', self.model.device)
-      self.model = get_model(device=self.device)
+
+      #self.model = get_model(device=self.device)
 
       with torch.no_grad():
           logits, cache = self.model.run_with_cache(tokens, remove_batch_dim=False)
-      print("computed grads")
+      #print("computed grads")
       lens_logits = self.forward(cache)
       loss = self.kl_loss(logits, lens_logits)
       self.log('train_loss', loss)

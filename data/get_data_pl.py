@@ -9,7 +9,7 @@ class DataModule(pl.LightningDataModule):
     self.data  = load_dataset('bookcorpus', split="train")  
 
   def train_dataloader(self):
-    return DataLoader(self.data, batch_size=64)
+    return DataLoader(self.data, batch_size=4, pin_memory=True, num_workers=16)
 
 '''
 def get_data(device, streaming=True, pin_memory=True, batch_size=32, dataset_name="c4", num_workers=16):
