@@ -15,6 +15,7 @@ import argparse
 
 
 #TODO (MS): clean up args and keep only relavent ones
+#NOTE(MS): I copied these args from a different project so they might not be relavent anymore
 #### SET UP USER ARGS
 parser = argparse.ArgumentParser()
 parser.add_argument("--local_rank", type=int)
@@ -149,7 +150,7 @@ class LightningLens(pl.LightningModule):
 model = LightningLens()
 data_module = DataModule()
 trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true',
-                     max_epochs=1,)
+                     max_epochs=1)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module)
