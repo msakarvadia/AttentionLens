@@ -7,3 +7,14 @@ Pytorch lighting has been used to support distributed training,  so you can also
 
 
 Demos for how to use a lens to view the vocabulary latent space of a specific attention head can be found in the "demos" dir. Again, better docs comming soon. :)
+
+## Installation
+
+Requirements: 
+`python >=3.7,<3.11`
+
+```
+conda create --name attnlens python==3.10
+conda activate attnlens
+pip install -r requirements.txt
+```
