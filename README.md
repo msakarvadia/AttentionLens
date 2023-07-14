@@ -15,6 +15,7 @@ Requirements:
 
 ```
 git clone https://github.com/msakarvadia/AttentionLens.git
+cd AttentionLens
 conda create --name attnlens python==3.10
 conda activate attnlens
 pip install -r requirements.txt
@@ -24,6 +25,7 @@ pip install .
 ## Development
 ```
 git clone https://github.com/msakarvadia/AttentionLens.git
+cd AttentionLens
 conda create --name attnlens python==3.10
 conda activate attnlens
 pip install -r requirements.txt
