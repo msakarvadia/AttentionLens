@@ -1,10 +1,8 @@
 import sys
-sys.path.append('../')
-from data.get_data import get_data
-from data.get_data_pl import DataModule
-from model.get_model import get_model
-from lense.get_lense import get_lense
-from lense.lenseA import LenseA
+from attention_lense.data.get_data_pl import DataModule
+from attention_lense.model.get_model import get_model
+from attention_lense.lense.get_lense import get_lense
+from attention_lense.lense.lenseA import LenseA
 import torch
 import transformer_lens.utils as utils
 import torch.nn.functional as F
@@ -149,7 +147,8 @@ class LightningLens(pl.LightningModule):
 #LLM = get_model()
 model = LightningLens()
 data_module = DataModule()
-trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true',
+accelerator = "gpu" if torch.cuda.is_available() else "cpu"
+trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=accelerator,
                      max_epochs=1)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 

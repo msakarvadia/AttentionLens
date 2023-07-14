@@ -14,7 +14,18 @@ Requirements:
 `python >=3.7,<3.11`
 
 ```
+git clone https://github.com/msakarvadia/AttentionLens.git
 conda create --name attnlens python==3.10
 conda activate attnlens
 pip install -r requirements.txt
+pip install .
+```
+
+## Development
+```
+git clone https://github.com/msakarvadia/AttentionLens.git
+conda create --name attnlens python==3.10
+conda activate attnlens
+pip install -r requirements.txt
+pip install -e . # editable installation
 ```

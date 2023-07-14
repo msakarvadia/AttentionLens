@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch
-from lense.lenseA import LenseA
+from attention_lense.lense.lenseA import LenseA
 
 class TransformerAttentionLense(nn.Module):
     #NOTE (MS): this lense can support many layers
