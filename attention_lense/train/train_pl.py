@@ -24,6 +24,7 @@ parser.add_argument("--alpha", default=0.5, type=float)
 parser.add_argument("--epochs", default=3, type=int)
 parser.add_argument("--warmup_steps", default=10000, type=int)
 parser.add_argument("--batch_size", default=2, type=int)
+parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int)
 parser.add_argument("--checkpoint_dir", default="/grand/projects/SuperBERT/mansisak/kd_ckpts/", type=str)
@@ -68,27 +69,6 @@ class LightningLens(pl.LightningModule):
       lens_out = attn_lens_out[0]
 
       return lens_out
-      '''
-      batch_size, channels, width, height = x.size()
-      # (b, 1, 28, 28) -> (b, 1*28*28)
-      x = x.view(batch_size, -1)
-
-      # layer 1 (b, 1*28*28) -> (b, 128)
-      x = self.layer_1(x)
-      x = torch.relu(x)
-
-      # layer 2 (b, 128) -> (b, 256)
-      x = self.layer_2(x)
-      x = torch.relu(x)
-
-      # layer 3 (b, 256) -> (b, 10)
-      x = self.layer_3(x)
-
-      # probability distribution over labels
-      x = torch.log_softmax(x, dim=1)
-
-      return x
-      '''
 
   def kl_loss(self, logits, lens_logits):
     kldiv = torch.nn.KLDivLoss(reduction='batchmean')
@@ -97,14 +77,6 @@ class LightningLens(pl.LightningModule):
     loss = kldiv(k_lens_out, k_logits)
     return loss
 
-  '''
-  def on_before_optimizer_step(self, optimizer) -> None:
-    print("on_before_opt enter")
-    for p in self.trainable_params:
-        if p.grad is None:
-            print(p)
-    print("on_before_opt exit")
-  '''
 
   def training_step(self, train_batch, batch_idx):
       #x, y = train_batch
@@ -149,68 +121,9 @@ model = LightningLens()
 data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=accelerator,
-                     max_epochs=1)
+                     max_epochs=1,
+                     num_nodes=args.num_nodes)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module)
 #TODO (MS): implement checkpointing
-'''
-#single device
-device = "cuda:0" if torch.cuda.is_available() else "cpu"
-pin_memory=False
-if device!="cpu":
-    pin_memory=True
-
-batch_size = args.batch_size
-dataloader = get_data(streaming=True, 
-                        dataset_name="c4",
-                        batch_size=batch_size,
-                        pin_memory=pin_memory,
-                        device=device,
-                        num_workers=16)
-
-
-# do the training one layer at a time to prevent ram from running out
-hook_name = 'result'
-kldiv = torch.nn.KLDivLoss(reduction='batchmean')
-
-n_layer = args.layer_number
-
-#Initalize lense with model unembed/bias matrix
-lens_param = {'unembed': model.W_U, 'bias': model.b_U, 'n_head': model.cfg.n_heads, 'd_model': model.cfg.d_model, 'd_vocab': model.cfg.d_vocab, 'lense_class': LenseA}
-attn_lens = get_lense(n_layers=1, **lens_param).to(device)
-hook_id = utils.get_act_name(hook_name, n_layer)
-total_steps = 5
-progress_bar = tqdm(range(total_steps))
-
-for i, data in enumerate(dataloader):
-  if i == total_steps:
-      break
-
-  prompt = data['text']
-  tokens = model.to_tokens(prompt)
-
-  with torch.no_grad():
-      logits, cache = model.run_with_cache(tokens, remove_batch_dim=False)
-    
-  inputs = []
-  inputs.append(cache[hook_id])
-  input_tensor = torch.stack(inputs)
-
-  attn_lens_out = attn_lens(input_tensor)
-  lens_out = attn_lens_out[0]
-
-  #TODO (MS): are we supposed to log softmax both, or just one of these quantities
-  k_logits, k_lens_out = F.log_softmax(logits, dim=-1), F.log_softmax(lens_out, dim=-1)
-
-  loss = kldiv(k_lens_out, k_logits)
-  loss.backward()
-    
-  #update tqdm bar
-  progress_bar.update(1)
-    
-#Save attn lens in correct location
-name = "attn_lens_layer_"+str(n_layer)
-torch.save(attn_lens, name)
-#TODO (MS): need to test that lense is useable for model analysis later
-'''
