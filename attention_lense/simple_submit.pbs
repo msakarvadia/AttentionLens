@@ -46,13 +46,16 @@ fi
 
 # Commands to run prior to the Python script for setting up the environment
 PRELOAD="source /etc/profile ; "
+PRELOAD+="module load conda ; "
+PRELOAD+="conda activate ; "
+PRELOAD+="conda activate /home/mansisak/.conda/envs/attnlens ; "
 # PRELOAD+="module load conda/pytorch ; "
 # PRELOAD+="conda activate /lus/theta-fs0/projects/SuperBERT/jgpaul/envs/pytorch-1.9.1-cu11.3 ; "
 #PRELOAD+="module load conda ; "
 #PRELOAD+="conda activate ; "
 PRELOAD+="export OMP_NUM_THREADS=8 ; "
 
-PRELOAD="source /lus/grand/projects/SuperBERT/mansisak/AttentionLens/venv/bin/activate ; "
+#PRELOAD="source /lus/grand/projects/SuperBERT/mansisak/AttentionLens/venv/bin/activate ; "
 PRELOAD+="source ~/.bashrc ; "
 PRELOAD+="export OMP_NUM_THREADS=8 ; "
 
