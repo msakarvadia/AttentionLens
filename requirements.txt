@@ -72,7 +72,8 @@ torchaudio==2.0.2
 torchmetrics==1.0.0
 torchvision==0.15.2
 tqdm==4.65.0
-transformer-lens @ git+https://github.com/neelnanda-io/TransformerLens.git@218ebd6f491f47f5e2f64e4c4327548b60a093ebtransformers==4.30.2
+transformer-lens @ git+https://github.com/neelnanda-io/TransformerLens.git@218ebd6f491f47f5e2f64e4c4327548b60a093eb
+transformers==4.30.2
 triton==2.0.0
 typeguard==3.0.2
 typing_extensions==4.7.1
