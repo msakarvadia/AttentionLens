@@ -91,8 +91,11 @@ class LightningLens(pl.LightningModule):
       #self.model = get_model(device=self.device)
 
       with torch.no_grad():
-          logits, cache = self.model.run_with_cache(tokens, remove_batch_dim=False)
+          # only cache required hooks for lens
+          logits, cache = self.model.run_with_cache(tokens, names_filter=self.hook_id, remove_batch_dim=False)
       #print("computed grads")
+
+      print(cache.keys())
       lens_logits = self.forward(cache)
       loss = self.kl_loss(logits, lens_logits)
       self.log('train_loss', loss)
