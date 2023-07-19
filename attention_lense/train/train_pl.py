@@ -7,6 +7,7 @@ import torch
 import transformer_lens.utils as utils
 import torch.nn.functional as F
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import EarlyStopping
 from tqdm import tqdm
 import math
 import argparse
@@ -27,9 +28,11 @@ parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int)
-parser.add_argument("--checkpoint_dir", default="/grand/projects/SuperBERT/mansisak/kd_ckpts/", type=str, help="directory to store checkpoint files in")
+parser.add_argument("--checkpoint_dir", default="./", type=str, help="directory to store checkpoint files in")
 parser.add_argument("--accumulate_grad_batches", default=1, type=int, help="controls how many steps to accumulate gradients over")
 parser.add_argument("--reload_checkpoint", default=None, type=str, help="path to checkpoint file, if set training resumes using this checkpoint")
+parser.add_argument("--stopping_delta", default=1e-7, type=float, help="early stopping delta, if train loss decreases by <= delta we stop training")
+parser.add_argument("--stopping_patience", default=2, type=int, help="number of checks with no improvement after which to stop training")
 parser.add_argument("--layer_number", default=0, type=int)
 args = parser.parse_args()
 
@@ -121,9 +124,6 @@ class LightningLens(pl.LightningModule):
 
 #train
 #LLM = get_model()
-print(args.checkpoint_dir)
-print(args.accumulate_grad_batches)
-print(args.reload_checkpoint)
 model = LightningLens()
 data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
@@ -131,7 +131,8 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      max_epochs=1,
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
-                     accumulate_grad_batches=args.accumulate_grad_batches)
+                     accumulate_grad_batches=args.accumulate_grad_batches,
+                     callbacks=[EarlyStopping(monitor="train_loss", mode="min", min_delta=args.stopping_delta, patience=args.stopping_patience)])
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module, ckpt_path=args.reload_checkpoint)
