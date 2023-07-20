@@ -24,11 +24,11 @@ parser.add_argument("--temp", default=3, type=float)
 parser.add_argument("--alpha", default=0.5, type=float)
 parser.add_argument("--epochs", default=3, type=int)
 parser.add_argument("--warmup_steps", default=10000, type=int)
-parser.add_argument("--batch_size", default=2, type=int)
+parser.add_argument("--batch_size", default=1, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
 parser.add_argument("--checkpoint_mode", default="step", type=str, choices=["step", "loss"], help="whether to checkpoint on train loss decrease or training step number")
-parser.add_argument("--num_steps_per_checkpoint", default=1e6, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
+parser.add_argument("--num_steps_per_checkpoint", default=5, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
 parser.add_argument("--checkpoint_dir", default="./", type=str, help="directory to store checkpoint files in")
 parser.add_argument("--accumulate_grad_batches", default=1, type=int, help="controls how many steps to accumulate gradients over")
 parser.add_argument("--reload_checkpoint", default=None, type=str, help="path to checkpoint file, if set training resumes using this checkpoint")
@@ -68,18 +68,27 @@ class LightningLens(pl.LightningModule):
       #print("forward step device: ", self.device)
         
       inputs = []
+      #print("cached head: ", cache[self.hook_id].shape)
       inputs.append(cache[self.hook_id])
+      #print("inputs: ", len(inputs))
       input_tensor = torch.stack(inputs)
+      #print("input_tensor: ", input_tensor.shape)
 
       attn_lens_out = self.attn_lens(input_tensor)
       lens_out = attn_lens_out[0]
+      #print("attn_lens_out: ", attn_lens_out.shape)
+      #print("lens_out: ", lens_out.shape)
 
       return lens_out
 
   def kl_loss(self, logits, lens_logits):
-    kldiv = torch.nn.KLDivLoss(reduction='batchmean')
-    k_logits, k_lens_out = F.log_softmax(logits, dim=-1), F.log_softmax(lens_logits, dim=-1)
+    #print("logits: ", logits[:,-1,:].shape)
+    #print("lens_out: ", lens_logits[:,-1,:].shape)
+    kldiv = torch.nn.KLDivLoss(reduction='batchmean', log_target=True)
+    k_logits, k_lens_out = F.log_softmax(logits[:,-1,:], dim=-1), F.log_softmax(lens_logits[:,-1,:], dim=-1)
 
+    #print("k_logits: ", k_logits.shape)
+    #print("k_lens_out: ", k_lens_out.shape)
     loss = kldiv(k_lens_out, k_logits)
     return loss
 
@@ -90,6 +99,7 @@ class LightningLens(pl.LightningModule):
       #self.model = get_model(device=self.device)
       prompt = train_batch['text']
       tokens = self.model.to_tokens(prompt)
+      #print("prompt shape: ", tokens.shape)
       #print('device: ', self.device)
       #print('Tokens device number: ', tokens.get_device())
       #print('LLM device number: ', self.model.device)
@@ -101,8 +111,10 @@ class LightningLens(pl.LightningModule):
           logits, cache = self.model.run_with_cache(tokens, names_filter=self.hook_id, remove_batch_dim=False)
       #print("computed grads")
 
+      print("cache: ", cache)
       lens_logits = self.forward(cache)
       loss = self.kl_loss(logits, lens_logits)
+      print("loss: ", loss)
       self.log('train_loss', loss)
       return loss
 
