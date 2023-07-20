@@ -7,7 +7,7 @@ import torch
 import transformer_lens.utils as utils
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from pytorch_lightning.callbacks import EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from tqdm import tqdm
 import math
 import argparse
@@ -27,7 +27,8 @@ parser.add_argument("--warmup_steps", default=10000, type=int)
 parser.add_argument("--batch_size", default=2, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
-parser.add_argument("--num_steps_per_checkpoint", default=5, type=int)
+parser.add_argument("--checkpoint_mode", default="step", type=str, choices=["step", "loss"], help="whether to checkpoint on train loss decrease or training step number")
+parser.add_argument("--num_steps_per_checkpoint", default=1e6, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
 parser.add_argument("--checkpoint_dir", default="./", type=str, help="directory to store checkpoint files in")
 parser.add_argument("--accumulate_grad_batches", default=1, type=int, help="controls how many steps to accumulate gradients over")
 parser.add_argument("--reload_checkpoint", default=None, type=str, help="path to checkpoint file, if set training resumes using this checkpoint")
@@ -124,6 +125,28 @@ class LightningLens(pl.LightningModule):
 
 #train
 #LLM = get_model()
+
+file_tag = f"attnlens-layer-{args.layer_number}"
+early_stop_callback = EarlyStopping(monitor="train_loss", mode="min", min_delta=args.stopping_delta, patience=args.stopping_patience)
+train_loss_checkpoint = ModelCheckpoint(
+    save_top_k=10,
+    monitor="train_loss",
+    mode="min",
+    dirpath=args.checkpoint_dir,
+    filename=file_tag+"-{epoch:02d}-{train_loss:.2f}",
+)
+step_checkpoint = ModelCheckpoint(
+    save_top_k=10,
+    every_n_train_steps=args.num_steps_per_checkpoint,
+    monitor="step",
+    mode="max",
+    dirpath=args.checkpoint_dir,
+    filename=file_tag+"-{epoch:02d}-{step}",
+)
+
+checkpoint_callback = train_loss_checkpoint if args.checkpoint_mode == "loss" else step_checkpoint
+
+
 model = LightningLens()
 data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
@@ -132,7 +155,7 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
                      accumulate_grad_batches=args.accumulate_grad_batches,
-                     callbacks=[EarlyStopping(monitor="train_loss", mode="min", min_delta=args.stopping_delta, patience=args.stopping_patience)])
+                     callbacks=[early_stop_callback, checkpoint_callback])
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module, ckpt_path=args.reload_checkpoint)
