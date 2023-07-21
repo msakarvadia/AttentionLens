@@ -27,6 +27,7 @@ parser.add_argument("--warmup_steps", default=10000, type=int)
 parser.add_argument("--batch_size", default=1, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--resume_step", default=0, type=int)
+parser.add_argument("--mixed_precision", default=False, type=bool, help="whether to use mixed precision for training")
 parser.add_argument("--checkpoint_mode", default="step", type=str, choices=["step", "loss"], help="whether to checkpoint on train loss decrease or training step number")
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
 parser.add_argument("--checkpoint_dir", default="./", type=str, help="directory to store checkpoint files in")
@@ -111,10 +112,10 @@ class LightningLens(pl.LightningModule):
           logits, cache = self.model.run_with_cache(tokens, names_filter=self.hook_id, remove_batch_dim=False)
       #print("computed grads")
 
-      print("cache: ", cache)
+      # print("cache: ", cache)
       lens_logits = self.forward(cache)
       loss = self.kl_loss(logits, lens_logits)
-      print("loss: ", loss)
+      # print("loss: ", loss)
       self.log('train_loss', loss)
       return loss
 
@@ -157,12 +158,13 @@ step_checkpoint = ModelCheckpoint(
 )
 
 checkpoint_callback = train_loss_checkpoint if args.checkpoint_mode == "loss" else step_checkpoint
-
+training_precision = "16-mixed" if args.mixed_precision else 32
 
 model = LightningLens()
 data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=accelerator,
+                    precision=training_precision,
                      max_epochs=1,
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
