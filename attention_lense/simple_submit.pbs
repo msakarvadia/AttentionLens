@@ -1,11 +1,11 @@
-#!/bin/bash
-#COBALT -t 720
-#COBALT -n 1
-#COBALT -q full-node
-#COBALT -A SuperBERT
-#COBALT -O kd_$jobid
-##COBALT -M sakarvadia@uchicago.edu
-#COBALT --jobname knowledge_distillation
+#!/bin/bash 
+#PBS -l select=1
+#PBS -l walltime=00:30:00
+#PBS -q debug-scaling
+#PBS -l filesystems=home:grand:eagle
+#PBS -A ATPESC2023
+
+cd $PBS_O_WORKDIR
 
 # USAGE:
 #   
