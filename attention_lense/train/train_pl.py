@@ -185,6 +185,8 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      default_root_dir=args.checkpoint_dir,
                      accumulate_grad_batches=args.accumulate_grad_batches,
                      callbacks=[early_stop_callback, checkpoint_callback],
+                    #flush_logs_every_n_steps=100,
+                    log_every_n_steps=10,
                     logger=wandb_logger)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
