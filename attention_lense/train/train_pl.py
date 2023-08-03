@@ -15,7 +15,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 #### Logger
 wandb_logger = WandbLogger(log_model='all',
-                            name="attn_lens")
+                           project="attn_lens")
 
 
 #TODO (MS): clean up args and keep only relavent ones
@@ -143,14 +143,14 @@ file_tag = f"attnlens-layer-{args.layer_number}"
 early_stop_callback = EarlyStopping(monitor="train_loss", mode="min", min_delta=args.stopping_delta, patience=args.stopping_patience)
 
 train_loss_checkpoint = ModelCheckpoint(
-    save_top_k=10,
+    save_top_k=args.max_ckpt_num,
     monitor="train_loss",
     mode="min",
     dirpath=args.checkpoint_dir,
     filename=file_tag+"-{epoch:02d}-{train_loss:.2f}",
 )
 step_checkpoint = ModelCheckpoint(
-    save_top_k=10,
+    save_top_k=args.max_ckpt_num,
     every_n_train_steps=args.num_steps_per_checkpoint,
     monitor="step",
     mode="max",
@@ -186,7 +186,7 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      accumulate_grad_batches=args.accumulate_grad_batches,
                      callbacks=[early_stop_callback, checkpoint_callback],
                     #flush_logs_every_n_steps=100,
-                    log_every_n_steps=10,
+                    log_every_n_steps=1,
                     logger=wandb_logger)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
