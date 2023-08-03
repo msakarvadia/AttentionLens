@@ -159,7 +159,7 @@ data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=accelerator,
                     precision=training_precision,
-                     max_epochs=1,
+                     max_epochs=args.epochs,
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
                      accumulate_grad_batches=args.accumulate_grad_batches,
