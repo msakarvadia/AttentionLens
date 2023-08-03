@@ -11,6 +11,7 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from tqdm import tqdm
 import math
 import argparse
+import wandb
 from pytorch_lightning.loggers import WandbLogger
 
 #### Logger
@@ -117,6 +118,8 @@ class LightningLens(pl.LightningModule):
       loss = self.kl_loss(logits, lens_logits)
       # print("loss: ", loss)
       self.log('train_loss', loss, prog_bar=True)
+      my_dict = {"train_loss":loss}
+      wandb.log(my_dict, step=trainer.global_step)
       return loss
 
 
@@ -167,12 +170,22 @@ checkpoint = ModelCheckpoint(
     filename=file_tag+"-{epoch:02d}-{step}-{train_loss:.2f}",
     every_n_train_steps=args.num_steps_per_checkpoint,
 )
+log_checkpoint = ModelCheckpoint(
+    #TODO change the max num of checkpoints
+    #save_top_k=args.max_ckpt_num,
+    monitor="train_loss",
+    mode="min",
+    #dirpath=args.checkpoint_dir,
+    #filename=file_tag+"-{epoch:02d}-{step}-{train_loss:.2f}",
+    #every_n_train_steps=args.num_steps_per_checkpoint,
+)
 
 checkpoint_callback = train_loss_checkpoint if args.checkpoint_mode == "loss" else step_checkpoint
 training_precision = "16-mixed" if args.mixed_precision else 32
 
 #TODO hard coding a checkpoint for now
 checkpoint_callback = checkpoint
+checkpoint_callback = log_checkpoint
 print("Checkpoint Type: ", args.checkpoint_mode)
 
 model = LightningLens()
