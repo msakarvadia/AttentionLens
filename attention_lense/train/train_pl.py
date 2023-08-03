@@ -11,6 +11,11 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from tqdm import tqdm
 import math
 import argparse
+from pytorch_lightning.loggers import WandbLogger
+
+#### Logger
+wandb_logger = WandbLogger(log_model='all',
+                            name="attn_lens")
 
 
 #TODO (MS): clean up args and keep only relavent ones
@@ -19,6 +24,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--epochs", default=3, type=int)
+parser.add_argument("--max_ckpt_num", default=3, type=int, help="maximum number of ckpts to save")
 parser.add_argument("--batch_size", default=1, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--mixed_precision", default=True, type=bool, help="whether to use mixed precision for training")
@@ -153,7 +159,8 @@ step_checkpoint = ModelCheckpoint(
 )
 
 checkpoint = ModelCheckpoint(
-    save_top_k=10,
+    #TODO change the max num of checkpoints
+    save_top_k=args.max_ckpt_num,
     monitor="train_loss",
     mode="min",
     dirpath=args.checkpoint_dir,
@@ -177,7 +184,8 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
                      accumulate_grad_batches=args.accumulate_grad_batches,
-                     callbacks=[early_stop_callback, checkpoint_callback])
+                     callbacks=[early_stop_callback, checkpoint_callback],
+                    logger=wandb_logger)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
 
 trainer.fit(model, data_module, ckpt_path=args.reload_checkpoint)
