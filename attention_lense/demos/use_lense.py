@@ -96,9 +96,12 @@ inputs = []
 inputs.append(cache[hook_id])
 input_tensor = torch.stack(inputs)
 
-head = 8
-layer_0_head = attn_lens.lenses[0].linears[head]
-projected = layer_0_head(inputs[0][0][-1][head])
+for head in range(12):
+    #head = 8
+    print("Head: ", head)
+    layer_0_head = attn_lens.lenses[0].linears[head]
+    projected = layer_0_head(inputs[0][0][-1][head])
 
-topk_token_vals, topk_token_preds = torch.topk(projected, 70)
-print(model.to_string(topk_token_preds))
+    topk_token_vals, topk_token_preds = torch.topk(projected, 70)
+    print(model.to_string(topk_token_preds))
+    print("______________________")

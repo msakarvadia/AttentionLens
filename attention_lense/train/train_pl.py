@@ -12,11 +12,8 @@ from tqdm import tqdm
 import math
 import argparse
 import wandb
-from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.loggers import WandbLogger, CSVLogger
 
-#### Logger
-wandb_logger = WandbLogger(log_model='all',
-                           project="attn_lens")
 
 
 #TODO (MS): clean up args and keep only relavent ones
@@ -36,8 +33,12 @@ parser.add_argument("--accumulate_grad_batches", default=10, type=int, help="con
 parser.add_argument("--reload_checkpoint", default=None, type=str, help="path to checkpoint file, if set training resumes using this checkpoint")
 parser.add_argument("--stopping_delta", default=1e-7, type=float, help="early stopping delta, if train loss decreases by <= delta we stop training")
 parser.add_argument("--stopping_patience", default=2, type=int, help="number of checks with no improvement after which to stop training")
-parser.add_argument("--layer_number", default=0, type=int)
+parser.add_argument("--layer_number", default=9, type=int)
 args = parser.parse_args()
+
+#### Logger
+#wandb_logger = WandbLogger(log_model='all', project="attn_lens1")
+#csv_logger = CSVLogger(save_dir=args.checkpoint_dir, name="attn_lense")
 
 #### Pytorch lighting
 
@@ -50,7 +51,7 @@ class LightningLens(pl.LightningModule):
     #print("init step device: ", self.device)
     self.base_model = get_model(device=self.device)
     self.hook_name = 'result'
-    self.n_layer = 0
+    self.n_layer = args.layer_number
     self.hook_id = utils.get_act_name(self.hook_name, self.n_layer)
 
     #Initalize lense with model unembed/bias matrix
@@ -118,8 +119,8 @@ class LightningLens(pl.LightningModule):
       loss = self.kl_loss(logits, lens_logits)
       # print("loss: ", loss)
       self.log('train_loss', loss, prog_bar=True)
-      my_dict = {"train_loss":loss}
-      wandb.log(my_dict, step=trainer.global_step)
+      #my_dict = {"train_loss":loss}
+      #wandb.log(my_dict, step=trainer.global_step)
       return loss
 
 
@@ -170,25 +171,28 @@ checkpoint = ModelCheckpoint(
     filename=file_tag+"-{epoch:02d}-{step}-{train_loss:.2f}",
     every_n_train_steps=args.num_steps_per_checkpoint,
 )
-log_checkpoint = ModelCheckpoint(
-    #TODO change the max num of checkpoints
-    #save_top_k=args.max_ckpt_num,
+logging_checkpoint = ModelCheckpoint(
     monitor="train_loss",
     mode="min",
-    #dirpath=args.checkpoint_dir,
-    #filename=file_tag+"-{epoch:02d}-{step}-{train_loss:.2f}",
-    #every_n_train_steps=args.num_steps_per_checkpoint,
 )
+latest_checkpoint = ModelCheckpoint(monitor='step', 
+        mode='max', 
+        every_n_train_steps=10, 
+        save_top_k=1,dirpath=args.checkpoint_dir,
+        filename="latest-{epoch}-{step}")
 
 checkpoint_callback = train_loss_checkpoint if args.checkpoint_mode == "loss" else step_checkpoint
 training_precision = "16-mixed" if args.mixed_precision else 32
 
 #TODO hard coding a checkpoint for now
 checkpoint_callback = checkpoint
-checkpoint_callback = log_checkpoint
 print("Checkpoint Type: ", args.checkpoint_mode)
 
-model = LightningLens()
+def getLens():
+    return LightningLens()
+
+model = getLens()
+
 data_module = DataModule()
 accelerator = "gpu" if torch.cuda.is_available() else "cpu"
 trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=accelerator,
@@ -197,11 +201,14 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      num_nodes=args.num_nodes,
                      default_root_dir=args.checkpoint_dir,
                      accumulate_grad_batches=args.accumulate_grad_batches,
-                     callbacks=[early_stop_callback, checkpoint_callback],
+                     callbacks=[early_stop_callback, checkpoint],
+                     #callbacks=[early_stop_callback, logging_checkpoint, latest_checkpoint],
                     #flush_logs_every_n_steps=100,
-                    log_every_n_steps=1,
-                    logger=wandb_logger)
+                    #log_every_n_steps=1,
+                    #logger=csv_logger)
+                    #logger=wandb_logger)
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
+                    )
 
 trainer.fit(model, data_module, ckpt_path=args.reload_checkpoint)
 #TODO (MS): implement checkpointing
