@@ -77,7 +77,7 @@ fi
 # Training script and parameters
 #CMD="run_pretraining.py --input_dir $DATA --output_dir $OUTPUT_DIR --config_file $CONFIG " #Eventually we will use this type of command
 #CMD="mlm_distributed.py"
-CMD="train/train_pl.py --num_nodes $NNODES"
+CMD="train/train_pl.py --num_nodes $NNODES  --checkpoint_dir $ckpt --layer_number $l_num"
 
 RANK=0
 for NODE in $RANKS; do
