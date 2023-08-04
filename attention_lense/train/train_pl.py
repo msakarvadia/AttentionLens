@@ -22,7 +22,7 @@ from pytorch_lightning.loggers import WandbLogger, CSVLogger
 parser = argparse.ArgumentParser()
 parser.add_argument("--lr", default=1e-3, type=float)
 parser.add_argument("--epochs", default=3, type=int)
-parser.add_argument("--max_ckpt_num", default=3, type=int, help="maximum number of ckpts to save")
+parser.add_argument("--max_ckpt_num", default=1, type=int, help="maximum number of ckpts to save")
 parser.add_argument("--batch_size", default=1, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--mixed_precision", default=True, type=bool, help="whether to use mixed precision for training")
