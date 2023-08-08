@@ -27,6 +27,7 @@ parser.add_argument("--epochs", default=3, type=int)
 parser.add_argument("--max_ckpt_num", default=1, type=int, help="maximum number of ckpts to save")
 parser.add_argument("--batch_size", default=1, type=int)
 parser.add_argument("--num_nodes", default=1, type=int)
+parser.add_argument("--model_name", default="gpt2-small", type=str, choices=["gpt2-small", "gpt2-large"])
 parser.add_argument("--mixed_precision", default=True, type=bool, help="whether to use mixed precision for training")
 parser.add_argument("--checkpoint_mode", default="step", type=str, choices=["step", "loss"], help="whether to checkpoint on train loss decrease or training step number")
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
@@ -48,7 +49,7 @@ class LightningLens(pl.LightningModule):
 
   def __init__(self):
     super().__init__()
-    self.base_model = get_model(device=self.device)
+    self.base_model = get_model(model_name=args.model_name, device=self.device)
     self.hook_name = 'result'
     self.n_layer = args.layer_number
     self.hook_id = utils.get_act_name(self.hook_name, self.n_layer)
@@ -60,7 +61,7 @@ class LightningLens(pl.LightningModule):
     self.attn_lens = get_lense(n_layers=1, **lens_param)# .to(device)
    
   def setup(self, stage):
-    self.model = get_model(device=self.trainer.strategy.root_device)
+    self.model = get_model(model_name=args.model_name ,device=self.trainer.strategy.root_device)
     return
     
   def forward(self, cache):

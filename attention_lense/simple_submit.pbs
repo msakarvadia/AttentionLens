@@ -1,6 +1,6 @@
 #!/bin/bash 
 #PBS -l select=20
-#PBS -l walltime=3:00:00
+#PBS -l walltime=6:00:00
 #PBS -q ATPESC_BigRun
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ATPESC2023
@@ -79,7 +79,8 @@ fi
 #CMD="mlm_distributed.py"
 echo "ckpt dir: "$ckpt
 echo "layer num: "$l_num
-CMD="train/train_pl.py --num_nodes $NNODES  --checkpoint_dir $ckpt --layer_number $l_num"
+echo "model name: "$model_name
+CMD="train/train_pl.py --num_nodes $NNODES --model_name $model_name  --checkpoint_dir $ckpt --layer_number $l_num"
 
 RANK=0
 for NODE in $RANKS; do
