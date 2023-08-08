@@ -181,9 +181,11 @@ if (reload_ckpt == None):
         #check if there is a file that matches *.ckpt file format
         #grab the most recent *.ckpt file
         list_of_files = glob.glob(args.checkpoint_dir+'/*.ckpt')
-        latest_file = max(list_of_files, key=os.path.getctime)
-        print("latest checkpoint file: ",latest_file)
-        #assign latest file to be the ckpt_dir that we relaod from
-        reload_ckpt = latest_file
+        if (len(list_of_files)>0):
+            latest_file = max(list_of_files, key=os.path.getctime)
+            #assign latest file to be the ckpt_dir that we relaod from
+            reload_ckpt = latest_file
+
+print("latest checkpoint file: ",reload_ckpt)
 
 trainer.fit(model, data_module, ckpt_path=reload_ckpt)
