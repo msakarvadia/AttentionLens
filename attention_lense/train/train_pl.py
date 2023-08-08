@@ -1,4 +1,6 @@
 import sys
+import glob
+import os
 from attention_lense.data.get_data_pl import DataModule
 from attention_lense.model.get_model import get_model
 from attention_lense.lense.get_lense import get_lense
@@ -28,7 +30,7 @@ parser.add_argument("--num_nodes", default=1, type=int)
 parser.add_argument("--mixed_precision", default=True, type=bool, help="whether to use mixed precision for training")
 parser.add_argument("--checkpoint_mode", default="step", type=str, choices=["step", "loss"], help="whether to checkpoint on train loss decrease or training step number")
 parser.add_argument("--num_steps_per_checkpoint", default=5, type=int, help="number of steps after which to checkpoint (only valid for checkpoint_mode='step')")
-parser.add_argument("--checkpoint_dir", default="./checkpoint/", type=str, help="directory to store checkpoint files in")
+parser.add_argument("--checkpoint_dir", default="checkpoint", type=str, help="directory to store checkpoint files in")
 parser.add_argument("--accumulate_grad_batches", default=10, type=int, help="controls how many steps to accumulate gradients over")
 parser.add_argument("--reload_checkpoint", default=None, type=str, help="path to checkpoint file, if set training resumes using this checkpoint")
 parser.add_argument("--stopping_delta", default=1e-7, type=float, help="early stopping delta, if train loss decreases by <= delta we stop training")
@@ -168,10 +170,20 @@ trainer = pl.Trainer(strategy='ddp_find_unused_parameters_true', accelerator=acc
                      #TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
                     )
 
-### Automate reloading ckpt if ckpt_dir exists
-reload_dir = args.reload_checkpoint
-if (reload_dir == None):
+### Automate reloading ckpt if ckpt_dir exists and usr didn't specify a specific ckpt dir
+reload_ckpt = args.reload_checkpoint
+if (reload_ckpt == None):
     print("Ckpt dir to reload from is not specified, searching for existing ckpt dir.")
+    
+    #check if there the current ckpt_dir exists
+    if (os.path.exists(args.checkpoint_dir)):
+        print("Checkpoint dir exists")
+        #check if there is a file that matches *.ckpt file format
+        #grab the most recent *.ckpt file
+        list_of_files = glob.glob(args.checkpoint_dir+'/*.ckpt')
+        latest_file = max(list_of_files, key=os.path.getctime)
+        print("latest checkpoint file: ",latest_file)
+        #assign latest file to be the ckpt_dir that we relaod from
+        reload_ckpt = latest_file
 
-
-trainer.fit(model, data_module, ckpt_path=reload_dir)
+trainer.fit(model, data_module, ckpt_path=reload_ckpt)

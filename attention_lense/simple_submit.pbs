@@ -1,7 +1,7 @@
 #!/bin/bash 
-#PBS -l select=10
-#PBS -l walltime=01:00:00
-#PBS -q preemptable
+#PBS -l select=20
+#PBS -l walltime=3:00:00
+#PBS -q ATPESC_BigRun
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ATPESC2023
 
@@ -77,6 +77,8 @@ fi
 # Training script and parameters
 #CMD="run_pretraining.py --input_dir $DATA --output_dir $OUTPUT_DIR --config_file $CONFIG " #Eventually we will use this type of command
 #CMD="mlm_distributed.py"
+echo "ckpt dir: "$ckpt
+echo "layer num: "$l_num
 CMD="train/train_pl.py --num_nodes $NNODES  --checkpoint_dir $ckpt --layer_number $l_num"
 
 RANK=0
