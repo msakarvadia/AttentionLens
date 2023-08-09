@@ -2,13 +2,16 @@ import torch.nn as nn
 import torch
 import copy
 
+
 class LenseA(nn.Module):
-    def __init__(self, unembed, bias,  n_head, d_model, d_vocab ):
+    def __init__(self, unembed, bias, n_head, d_model, d_vocab):
         super(LenseA, self).__init__()
         self.n_head = n_head
         self.d_model = d_model
         self.d_vocab = d_vocab
-        self.linears = nn.ModuleList([nn.Linear(d_model, d_vocab) for _ in range(n_head)])
+        self.linears = nn.ModuleList(
+            [nn.Linear(d_model, d_vocab) for _ in range(n_head)]
+        )
         for i in self.linears:
             i.weight = nn.Parameter(unembed.T.clone())
             i.bias = nn.Parameter(bias.clone())
@@ -16,10 +19,14 @@ class LenseA(nn.Module):
     def forward(self, input_tensor):
         batch_size, pos, n_head, d_model = input_tensor.size()
 
-        output_tensors = torch.empty((batch_size, pos, self.n_head, self.d_vocab), device=input_tensor.device)
+        output_tensors = torch.empty(
+            (batch_size, pos, self.n_head, self.d_vocab), device=input_tensor.device
+        )
 
         for i in range(n_head):
-            output_pos = torch.empty((batch_size, pos, self.d_vocab), device=input_tensor.device)
+            output_pos = torch.empty(
+                (batch_size, pos, self.d_vocab), device=input_tensor.device
+            )
 
             for j in range(pos):
                 # Select the i-th head for the j-th position
@@ -42,7 +49,6 @@ class LenseA(nn.Module):
 
         # Sum across the second to last dimension
         summed_output = output_tensors.sum(dim=2)
-        #print(summed_output.size())
+        # print(summed_output.size())
 
         return summed_output
-
