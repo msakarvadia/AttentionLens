@@ -5,7 +5,7 @@
 #PBS -l filesystems=home:grand:eagle
 #PBS -A ATPESC2023
 
-cd "/lus/eagle/projects/datascience/mansisak/AttentionLens/attention_lense"
+cd "/lus/grand/projects/SuperBERT/mansisak/AttentionLens/attention_lense"
 echo "working dir: "
 pwd
 
