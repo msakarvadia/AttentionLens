@@ -35,7 +35,7 @@ prompts = ["George Washington fought in the",
             "The leader of the United States live in the"
             ]
 
-def interpret_layer(prompt, attn_lens):
+def interpret_layer(prompt, attn_lens, k_tokens=30):
     tokens = model.to_tokens(prompt)
 
     with torch.no_grad():
@@ -48,13 +48,21 @@ def interpret_layer(prompt, attn_lens):
     input_tensor = torch.stack(inputs)
 
     for head in range(12):
+        print("projecting with Lense:")
         #head = 8
         print("Head: ", head)
         layer_head = attn_lens.lenses[0].linears[head]
         projected = layer_head(inputs[0][0][-1][head])
 
-        topk_token_vals, topk_token_preds = torch.topk(projected, 70)
-        print(model.to_string(topk_token_preds))
+        topk_token_vals, topk_token_preds = torch.topk(projected, k_tokens)
+        print(model.to_string(topk_token_preds.reshape(k_tokens, 1)))
+
+        print("projecting with model's unembedding: ")
+        logits = model.unembed(inputs[0][:,:,head,:]) 
+        
+        topk_token_preds = torch.topk(logits, k_tokens)
+        print(model.to_string(topk_token_preds[1][0][-1].reshape(k_tokens, 1)))
+        
         print("______________________")
 
 for prompt in prompts:
