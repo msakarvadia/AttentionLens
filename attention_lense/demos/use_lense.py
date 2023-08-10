@@ -1,17 +1,18 @@
 import sys
-sys.path.append('../')
+
+sys.path.append("../")
 from attention_lense.model.get_model import get_model
 from attention_lense.lense.get_lense import get_lense
 from attention_lense.lense.lenseA import LenseA
-#from attention_lense.train.train_pl import LightningLens
-#import attention_lense.train as AL
+
+# from attention_lense.train.train_pl import LightningLens
+# import attention_lense.train as AL
 import pytorch_lightning as pl
 import torch
 import transformer_lens.utils as utils
 import torch.nn.functional as F
 from tqdm import tqdm
 import argparse
-
 
 #### SET UP USER ARGS
 parser = argparse.ArgumentParser()
