@@ -1,17 +1,30 @@
-# Welcome to MkDocs
+# Welcome to AttentionLens
+Interpreting the latent space representations of attention head outputs for _Large Language Models_ (LLMs).
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+To train attention lense, navigate to the `train/` dir and run the command `python train_pl.py`.
 
-## Commands
+PyTorch Lighting has been used to support distributed training, so you can also use `torch.distributed.run` to distribute training across nodes. More complete documentation is coming soon.
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+Demos for how to use a lens to view the vocabulary latent space of a specific attention head can be found in the `demos/` dir. Again, better docs coming soon. :smile:
 
-## Project layout
+## Installation
+Requirements: python >=3.7,<3.11
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+```shell
+git clone https://github.com/msakarvadia/AttentionLens.git
+cd AttentionLens
+conda create --name attnlens python==3.10
+conda activate attnlens
+pip install -r requirements.txt
+pip install .
+```
+
+## Development
+```shell
+git clone https://github.com/msakarvadia/AttentionLens.git
+cd AttentionLens
+conda create --name attnlens python==3.10
+conda activate attnlens
+pip install -r requirements.txt
+pip install -e . # editable installation
+```
