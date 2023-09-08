@@ -18,6 +18,9 @@ def get_model(
         model_name (str): The name of the pre-trained model.
         device (Union[str, torch.types.Device]): The device to train on.
 
+    Examples:
+        >>> model = get_model(model="gpt2-small")
+
     Returns:
         The pre-trained model with hooks.
     """
