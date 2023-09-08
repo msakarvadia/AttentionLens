@@ -7,8 +7,7 @@ repo_url: https://github.com/msakarvadia/AttentionLens
 nav:
   - Home: index.md
   - API Reference: reference/
-#  - Publications:
-#      - publications/index.md
+  - Publications: publications.md
 
 theme:
   name: material
