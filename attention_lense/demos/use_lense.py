@@ -13,6 +13,7 @@ import transformer_lens.utils as utils
 import torch.nn.functional as F
 from tqdm import tqdm
 import argparse
+import numpy as np
 
 #### SET UP USER ARGS
 parser = argparse.ArgumentParser()
@@ -21,6 +22,7 @@ parser.add_argument("--model", default="gpt2-small", choices=["gpt2-small","gpt2
 parser.add_argument("--layer_num", default=9, type=int, help="layer number that lense corresponds to")
 parser.add_argument("--num_attn_heads", default=12, choices=[12,36],type=int, help="number of attention heads in your model")
 parser.add_argument("--k_tokens", default=50, type=int, help="number of top token predictions to view")
+parser.add_argument("--prompt", default="George Washintgon fought in the", type=str, help="a prompt you would like to inspect with attn lens")
 args = parser.parse_args()
 
 #single device
@@ -32,13 +34,16 @@ model = get_model(args.model,device=device)
 
 attn_lens = torch.load(args.lense_loc)
 
+
 prompts = ["George Washington fought in the",
             "The first president of the united states fought in the",
             "St. Peter's Bascillica is in the city of",
-            "The leader of the United States live in the"
+            "The leader of the United States live in the",
+            "Give me 10 yummy desserts. For example 1) cupcakes, 2) cake, 3) cookies, 4) pie 5) "
             ]
 
 def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
+    print(prompt)
     tokens = model.to_tokens(prompt)
 
     with torch.no_grad():
@@ -54,6 +59,12 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
         print("Head: ", head)
         print("projecting with Lense:")
         layer_head = attn_lens.lenses[0].linears[head]
+
+        #Count number of trainable parameters in lens
+        attn_lens_parameters = filter(lambda p: p.requires_grad, layer_head.parameters())
+        params = sum([np.prod(p.size()) for p in attn_lens_parameters])
+        print("number of trainable parameters in lens: ", params)
+
         projected = layer_head(inputs[0][0][-1][head])
 
         topk_token_vals, topk_token_preds = torch.topk(projected, k_tokens)
@@ -70,3 +81,4 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
 for prompt in prompts:
     print("Prompt: ", prompt)
     interpret_layer(prompt, attn_lens)
+#interpret_layer(args.prompt, attn_lens)
