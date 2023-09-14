@@ -18,7 +18,7 @@ git clone https://github.com/msakarvadia/AttentionLens.git
 cd AttentionLens
 conda create --name attnlens python==3.10
 conda activate attnlens
-pip install -r requirements.txt #or use requirements_cpu.txt if you only have CPU access
+pip install -r requirements.txt [or use requirements_cpu.txt if you only have CPU access]
 pip install .
 ```
 
@@ -32,6 +32,6 @@ git clone https://github.com/msakarvadia/AttentionLens.git
 cd AttentionLens
 conda create --name attnlens python==3.10
 conda activate attnlens
-pip install -r requirements.txt #or use requirements_cpu.txt if you only have CPU access
+pip install -r requirements.txt [or use requirements_cpu.txt if you only have CPU access]
 pip install -e . # editable installation
 ```
