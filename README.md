@@ -22,6 +22,10 @@ pip install -r requirements.txt
 pip install .
 ```
 
+## Documentation
+We used `mkdocs` to generate our documentation. To launch it locally, first run `pip install mkdocs` in your environment for AttentionLens. Then, run `mkdocs serve`.
+It will ask for you to install additional required packages based on the current configuration. Install those with `pip` until they're all resolved.
+
 ## Development
 ```
 git clone https://github.com/msakarvadia/AttentionLens.git
