@@ -1,0 +1,111 @@
+site_name: Attention-Lens
+#site_url: https://flox.dev/
+repo_name: msakarvadia/AttentionLens
+repo_url: https://github.com/msakarvadia/AttentionLens
+
+
+nav:
+  - Home: index.md
+  - API Reference: reference/
+  - Publications: publications.md
+
+theme:
+  name: material
+  language: en
+  font:
+    text: Open Sans
+    code: JetBrains Mono # Roboto Mono
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - content.code.select
+    - navigation.path
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+      primary: blue grey
+      accent: teal
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+      primary: black
+      accent: teal
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - gen-files:
+      scripts:
+        - docs/generate_api.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      custom_templates: docs/_templates
+      enable_inventory: false
+      handlers:
+        python:
+          paths: [ attention_lense ]
+          load_external_modules: true
+          options:
+            show_source: false
+            docstring_section_style: list # spacy
+            docstring_style: google
+            inherited_members: yes
+            line_length: 60
+            members_order: source # alphabetical
+            merge_init_into_class: yes
+            separate_signature: yes
+            # Mutually exclusive with separate_signature
+            show_root_members_full_path: no
+            # Causes black error with show_root_full_path
+            # show_object_full_path: yes
+            show_root_full_path: yes
+            show_signature_annotations: yes
+            show_submodules: False
+  #            summary: true
+  - search
+  - section-index
+
+markdown_extensions:
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+      # Math typesetting
+  - pymdownx.arithmatex:
+      generic: true
+
+  # Syntax highlighting for code blocks
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - footnotes
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+      # Javascript for math typesetting
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
