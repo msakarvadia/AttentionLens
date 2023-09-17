@@ -1,5 +1,7 @@
 # AttentionLens
-Interpreting the latent space representations of attention head outputs for LLMs
+Interpreting the latent space representations of attention head outputs for LLMs.
+
+![picture](https://drive.google.com/uc?export=view&id=1Xw_Yo6v4wtCFKaJpsOujOo1J6XWu9GqF)
 
 To train attention lense, navigate to the "train" dir and run the command "python train_pl.py".
 
