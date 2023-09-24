@@ -24,6 +24,12 @@ parser.add_argument(
     help="path to dir containing all latest ckpts for a model",
 )
 parser.add_argument(
+    "--prompt",
+    default="Hello my name is",
+    type=str,
+    help="prompt that the model will use for input",
+)
+parser.add_argument(
     "--model",
     default="gpt2-small",
     choices=["gpt2-small", "gpt2-large"],
@@ -99,7 +105,7 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
         print("______________________")
 
 
-for prompt in prompts:
-    print("Prompt: ", prompt)
-    interpret_layer(prompt, attn_lens)
-#interpret_layer(args.prompt, attn_lens)
+#for prompt in prompts:
+#    print("Prompt: ", prompt)
+#    interpret_layer(prompt, attn_lens)
+interpret_layer(args.prompt, attn_lens)
