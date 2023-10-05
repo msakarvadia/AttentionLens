@@ -125,7 +125,7 @@ triton==2.0.0
 typeguard==3.0.2
 typing_extensions==4.7.1
 tzdata==2023.3
-urllib3==2.0.4
+urllib3==1.26.17
 uvicorn==0.23.2
 wandb==0.15.9
 watchdog==3.0.0
