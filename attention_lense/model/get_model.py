@@ -12,7 +12,7 @@ from transformer_lens import (
 def get_model(
     model_name: str = "gpt2-small", device: Union[str, torch.types.Device] = "cuda"
 ) -> HookedTransformer:
-    """Loads and returns a pre-trained model from the HookedTransformer library by the given ``name``.
+    """Loads and returns a pre-trained model from the TransformerLens library by the given ``name``.
 
     Args:
         model_name (str): The name of the pre-trained model.
