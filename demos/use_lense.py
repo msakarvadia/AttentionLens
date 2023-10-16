@@ -49,10 +49,15 @@ parser.add_argument(
 parser.add_argument(
     "--k_tokens", default=50, type=int, help="number of top token predictions to view"
 )
+parser.add_argument(
+    "--cpu", default=True, type=bool, help="force cpu use"
+)
 args = parser.parse_args()
 
 # single device
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
+if(args.cpu):
+    device = "cpu"
 
 # get model
 model = get_model(args.model, device=device)
