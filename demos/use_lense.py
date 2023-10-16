@@ -51,7 +51,7 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 # get model
 model = get_model(args.model, device=device)
 
-attn_lens = torch.load(args.lense_loc)
+attn_lens = torch.load(args.lense_loc, map_location=torch.device(device))
 
 
 prompts = ["George Washington fought in the",
