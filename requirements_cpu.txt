@@ -5,7 +5,6 @@ anyio==3.7.1
 appdirs==1.4.4
 arrow==1.2.3
 async-timeout==4.0.3
--e git+ssh://git@github.com/msakarvadia/AttentionLens.git@930be408d94fd557d2015828e2c710abe7ec9f43#egg=attention_lense
 attrs==23.1.0
 Babel==2.12.1
 backoff==2.2.1
