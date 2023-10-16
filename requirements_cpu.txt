@@ -80,7 +80,7 @@ paginate==0.5.6
 pandas==2.1.0
 pathspec==0.11.2
 pathtools==0.1.2
-Pillow==10.0.1
+Pillow
 platformdirs==3.10.0
 protobuf==4.24.2
 psutil==5.9.5
