@@ -47,7 +47,6 @@ args = parser.parse_args()
 
 # single device
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
-device = "cpu"
 
 # get model
 model = get_model(args.model, device=device)
