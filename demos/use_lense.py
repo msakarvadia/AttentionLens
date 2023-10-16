@@ -74,6 +74,9 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
 
     with torch.no_grad():
         logits, cache = model.run_with_cache(tokens, remove_batch_dim=False)
+        topk_token_preds = torch.topk(logits, args.k_tokens)
+        print("Model's predictions: ", topk_token_preds[1].shape)
+        print(model.to_string(topk_token_preds[1][0][-1].reshape(args.k_tokens, 1)))
 
     inputs = []
     hook_name = "result"
@@ -101,6 +104,7 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
 
         topk_token_preds = torch.topk(logits, args.k_tokens)
         print(model.to_string(topk_token_preds[1][0][-1].reshape(args.k_tokens, 1)))
+    
 
         print("______________________")
 
