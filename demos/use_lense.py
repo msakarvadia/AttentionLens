@@ -42,7 +42,7 @@ parser.add_argument(
 parser.add_argument(
     "--num_attn_heads",
     default=12,
-    choices=[12, 36],
+    choices=[12, 20],
     type=int,
     help="number of attention heads in your model",
 )
