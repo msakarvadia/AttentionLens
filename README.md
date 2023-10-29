@@ -1,4 +1,6 @@
 # AttentionLens
+Read the [paper](https://arxiv.org/abs/2310.16270).
+
 Read the docs here: https://msakarvadia.github.io/AttentionLens/
 
 Interpreting the latent space representations of attention head outputs for LLMs.
