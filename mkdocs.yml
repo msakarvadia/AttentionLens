@@ -6,6 +6,8 @@ repo_url: https://github.com/msakarvadia/AttentionLens
 
 nav:
   - Home: index.md
+  - Getting Started:
+    - Introduction: getting_started/index.md
   - API Reference: reference/
   - Publications: publications.md
 
@@ -47,6 +49,9 @@ extra_css:
   - stylesheets/extra.css
 
 plugins:
+  - mermaid2
+  - search
+  - section-index
   - gen-files:
       scripts:
         - docs/generate_api.py
@@ -57,7 +62,7 @@ plugins:
       enable_inventory: false
       handlers:
         python:
-          paths: [ attention_lense ]
+          paths: [ attention_lens ]
           load_external_modules: true
           options:
             show_source: false
@@ -76,8 +81,6 @@ plugins:
             show_signature_annotations: yes
             show_submodules: False
   #            summary: true
-  - search
-  - section-index
 
 markdown_extensions:
   - pymdownx.emoji:
@@ -100,6 +103,12 @@ markdown_extensions:
   - pymdownx.mark
   - footnotes
   - attr_list
+  - pymdownx.superfences:
+      # make exceptions to highlighting of code:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:mermaid2.fence_mermaid_custom
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg

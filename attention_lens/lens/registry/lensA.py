@@ -1,22 +1,29 @@
 import torch.nn as nn
 import torch
-import copy
+
+from attention_lens.lens.base import Lens
 
 
-class LenseA(nn.Module):
+class LensA(Lens):
     def __init__(self, unembed, bias, n_head, d_model, d_vocab):
-        super(LenseA, self).__init__()
-        self.n_head = n_head
-        self.d_model = d_model
-        self.d_vocab = d_vocab
+        super().__init__(unembed, bias, n_head, d_model, d_vocab)
         self.linears = nn.ModuleList(
-            [nn.Linear(d_model, d_vocab) for _ in range(n_head)]
+            [nn.Linear(self.d_model, self.d_vocab) for _ in range(self.n_head)]
         )
         for i in self.linears:
             i.weight = nn.Parameter(unembed.T.clone())
             i.bias = nn.Parameter(bias.clone())
 
     def forward(self, input_tensor):
+        r"""
+        This is optimizing $f(x) = \sum_{...} ...$ (TODO)
+
+        Args:
+            input_tensor ():
+
+        Returns:
+
+        """
         batch_size, pos, n_head, d_model = input_tensor.size()
 
         output_tensors = torch.empty(

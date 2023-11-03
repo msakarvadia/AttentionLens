@@ -6,7 +6,7 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
-project_dir = "attention_lense"
+project_dir = "attention_lens"
 reference_dir = "reference"
 
 for path in sorted(Path(project_dir).rglob("**/*.py")):

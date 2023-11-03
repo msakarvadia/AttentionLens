@@ -2,9 +2,9 @@ import sys
 
 sys.path.append("..")
 
-from attention_lense.model.get_model import get_model
-from attention_lense.lense.get_lense import get_lense
-from attention_lense.lense.lenseA import LenseA
+from attention_lens.model.get_model import get_model
+from attention_lens.lens.base import get_lense
+from attention_lens.lens.registry.lensA import LenseA
 import torch
 import glob
 import os
@@ -17,7 +17,7 @@ parser.add_argument(
     "--ckpt_dir",
     default="/lus/grand/projects/SuperBERT/mansisak/attn_lens_ckpts/gpt2-small/",
     type=str,
-    help="path to dir containing all latest ckpts for a model",
+    help="path to dir containing all latest ckpts for a lens",
 )
 parser.add_argument(
     "--save_dir",
@@ -30,7 +30,7 @@ args = parser.parse_args()
 # single device
 device = "cpu"
 
-# Initalize lense with model unembed/bias matrix
+# Initalize lens with lens unembed/bias matrix
 model = get_model(device=device)
 lens_param = {
     "unembed": model.W_U,
