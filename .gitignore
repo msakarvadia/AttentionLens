@@ -1,6 +1,6 @@
 *__pycache__/
 *.egg-info/
-attention_lense/lightning_logs/
+attention_lens/lightning_logs/
 checkpoint/
 
 # IDE-specific directories to ignore.

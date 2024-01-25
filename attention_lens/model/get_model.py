@@ -12,21 +12,21 @@ from transformer_lens import (
 def get_model(
     model_name: str = "gpt2-small", device: Union[str, torch.types.Device] = "cuda"
 ) -> HookedTransformer:
-    """Loads and returns a pre-trained model from the TransformerLens library by the given ``name``.
+    """Loads and returns a pre-trained lens from the TransformerLens library by the given ``name``.
 
     Args:
-        model_name (str): The name of the pre-trained model.
+        model_name (str): The name of the pre-trained lens.
         device (Union[str, torch.types.Device]): The device to train on.
 
     Examples:
-        >>> model = get_model(model="gpt2-small")
+        >>> lens = get_model(lens="gpt2-small")
 
     Returns:
-        The pre-trained model with hooks.
+        The pre-trained lens with hooks.
     """
-    # model = HookedTransformer.from_pretrained(model_name)
+    # lens = HookedTransformer.from_pretrained(model_name)
     model = HookedTransformer.from_pretrained(model_name, device=device)
     model.cfg.use_attn_result = True
 
-    print("model created on device: ", device)
+    print("lens created on device: ", device)
     return model
