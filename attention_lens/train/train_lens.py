@@ -25,6 +25,7 @@ def train_lens(
         num_nodes=config.num_nodes,
         default_root_dir=config.checkpoint_dir,
         accumulate_grad_batches=config.accumulate_grad_batches,
+        strategy=config.strategy,
         callbacks=callbacks,
         # callbacks=[early_stop_callback, logging_checkpoint, latest_checkpoint],
         # flush_logs_every_n_steps=100,

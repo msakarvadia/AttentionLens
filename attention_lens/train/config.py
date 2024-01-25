@@ -23,6 +23,7 @@ class TrainConfig:
     reload_checkpoint: Optional[Path | str] = field(default=None)
     stopping_delta: float = field(default=1e-7)
     stopping_patience: int = field(default=2)
+    strategy: str = field(default="ddp_find_unused_parameters_true")
 
     # AttentionLens-specific arguments
     model_name: str = field(default="gpt2-small")  # Choices are `OFFICIAL_MODEL_NAMES`
