@@ -132,7 +132,7 @@ Pympler==1.0.1
 pyparsing==3.0.9
 python-dateutil==2.8.2
 python-editor==1.0.4
-python-multipart==0.0.6
+python-multipart==0.0.7
 pytorch-lightning==2.0.4
 pytz==2023.3
 pytz-deprecation-shim==0.1.0.post0
