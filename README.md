@@ -9,7 +9,7 @@ Interpreting the latent space representations of attention head outputs for LLMs
 <img src="https://drive.google.com/uc?export=view&id=1Xw_Yo6v4wtCFKaJpsOujOo1J6XWu9GqF" width="400px">
 </div>
 
-To train attention lenses, navigate to the `train/` dir and run the command `python train_pl.py`.
+To train attention lenses,  run the command `python train.py`.
 
 [Pytorch Lightning](https://lightning.ai) has been used to support distributed training, so you can also use `torch.distributed.run <args>` to distribute training across nodes. Better documentation coming soon.
 
