@@ -10,6 +10,7 @@ from attention_lens.lens import Lens
 from attention_lens.model.get_model import get_model
 
 
+
 class LightningLens(pl.LightningModule):
     def __init__(
         self,
@@ -99,11 +100,12 @@ class LightningLens(pl.LightningModule):
         prompt = train_batch["text"]
         #tokens = self.model.to_tokens(prompt)
 
-        prompt_tokens = self.tokenizer(prompt, return_tensors = 'pt')
+        prompt_tokens = self.tokenizer(prompt, return_tensors = 'pt', padding=True, truncation=True)
         prompt_length = prompt_tokens['input_ids'].shape[1]
         max_length = prompt_length + 1
 
-        inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, return_tensors='pt')
+        #NOTE: Had to use 'padding = true'
+        inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, padding=True, return_tensors='pt')
 
         # with torch.no_grad():
         #     # only cache required hooks for lens
