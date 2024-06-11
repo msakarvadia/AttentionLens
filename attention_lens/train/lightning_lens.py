@@ -3,8 +3,8 @@ from __future__ import annotations
 import lightning.pytorch as pl
 import torch
 import torch.nn.functional as F
-import transformer_lens as tlens
-from transformer_lens import HookedTransformer
+#import transformer_lens as tlens
+#from transformer_lens import HookedTransformer
 
 from attention_lens.lens import Lens
 from attention_lens.model.get_model import get_model
@@ -21,7 +21,7 @@ class LightningLens(pl.LightningModule):
     ):
         super().__init__(**kwargs)
         self.model_name = model_name
-        self.hooked_model = get_model(model_name=self.model_name, device=self.device)
+        self.model, self.tokenizer = get_model(model_name=self.model_name, device=self.device)
         if isinstance(lens_cls, str):
             lens_cls = Lens.get_lens(lens_cls)
         if isinstance(lens_cls, Lens):
@@ -30,19 +30,34 @@ class LightningLens(pl.LightningModule):
                 "string corresponding to the class (check the ``Lens.registry``). Available ``Lens`` objects are:"
                 f"{list(Lens.registry.keys())}"
             )
+        
+        #print(self.model.config.bos_token_id)
+        self.layer_num = layer_num
 
         self.attn_lens = lens_cls(
-            unembed=self.hooked_model.W_U,
-            bias=self.hooked_model.b_U,
-            n_head=self.hooked_model.cfg.n_heads,
-            d_model=self.hooked_model.cfg.d_model,
-            d_vocab=self.hooked_model.cfg.d_vocab,
+            unembed=self.model.lm_head.weight,
+            bias=self.model.transformer.h[self.layer_num].attn.c_proj.bias,
+            n_head=self.model.config.num_attention_heads,
+            d_model=self.model.config.hidden_size,
+            d_vocab=self.model.config.vocab_size,
         )
 
-        self.hook_name = "result"
-        self.layer_num = layer_num
+        self.activation = {}
+        self.register_hooks(self.model, self.get_activation)
+
+        #self.hook_name = "result"
         self.lr = lr
-        self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
+        #self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
+        #self.attention_layer = self.activation['layer_{self.layer_num}_attn'][1]
+
+    def get_activation(self, name):
+        def hook(model, input, output):
+            self.activation[name] = output[1]
+        return hook
+    
+    def register_hooks(self, model, hook_func):
+        for idx, layer in enumerate(model.transformer.h):
+            layer.attn.register_forward_hook(hook_func(f"layer_{idx}_attn"))
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         kldiv = torch.nn.KLDivLoss(reduction="batchmean", log_target=True)
@@ -60,7 +75,7 @@ class LightningLens(pl.LightningModule):
         #       additional setup in this setting, but `__init__` is only called on the master CPU. So, `self.model`
         #       and `self.hooked_model` are separate desppite being initialized identically. We need to confirm if
         #       they must be named differently for Lightning to work.
-        self.model: HookedTransformer = get_model(
+        self.model, self.tokenizer = get_model(
             model_name=self.model_name, device=self.trainer.strategy.root_device
         )
 
@@ -74,20 +89,33 @@ class LightningLens(pl.LightningModule):
 
         """
         inputs = list()
-        inputs.append(cache[self.hook_id])
+        #inputs.append(cache[self.hook_id])
+        inputs.append(cache)
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
         return self.attn_lens(inputs)
 
     def training_step(self, train_batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
         prompt = train_batch["text"]
-        tokens = self.model.to_tokens(prompt)
+        #tokens = self.model.to_tokens(prompt)
+
+        prompt_tokens = self.tokenizer(prompt, return_tensors = 'pt')
+        prompt_length = prompt_tokens['input_ids'].shape[1]
+        max_length = prompt_length + 1
+
+        inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, return_tensors='pt')
+
+        # with torch.no_grad():
+        #     # only cache required hooks for lens
+        #     logits, cache = self.model.run_with_cache(
+        #         tokens, names_filter=self.hook_id, remove_batch_dim=False
+        #     )
 
         with torch.no_grad():
-            # only cache required hooks for lens
-            logits, cache = self.model.run_with_cache(
-                tokens, names_filter=self.hook_id, remove_batch_dim=False
-            )
+            self.activation.clear()
+            outputs = self.model(**inputs)
+            cache = self.activation['layer_{self.layer_num}_attn'][1]
+            logits = outputs.logits
 
         lens_logits = self.forward(cache)
         loss = self.kl_loss(logits, lens_logits)

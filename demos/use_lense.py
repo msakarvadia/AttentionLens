@@ -26,8 +26,8 @@ parser.add_argument(
 )
 parser.add_argument(
     "--lens",
-    default="gpt2-small",
-    choices=["gpt2-small", "gpt2-large"],
+    default="gpt2",
+    choices=["gpt2", "gpt2-large"],
     type=str,
     help="lens that the lens corresponds to",
 )
@@ -44,6 +44,14 @@ parser.add_argument(
 parser.add_argument(
     "--k_tokens", default=50, type=int, help="number of top token predictions to view"
 )
+
+parser.add_argument(
+    "--model",
+    default="gpt2",  # Test to see if this makes the code work
+    type=str,
+    help="model type that the lens corresponds to",
+)
+
 parser.add_argument("--cpu", default=True, type=bool, help="force cpu use")
 args = parser.parse_args()
 
