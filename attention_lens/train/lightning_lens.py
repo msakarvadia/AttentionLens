@@ -107,6 +107,8 @@ class LightningLens(pl.LightningModule):
         #NOTE: Had to use 'padding = true'
         inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, padding=True, return_tensors='pt')
 
+        self.register_hooks(self.model, self.get_activation)
+
         # with torch.no_grad():
         #     # only cache required hooks for lens
         #     logits, cache = self.model.run_with_cache(
@@ -116,7 +118,7 @@ class LightningLens(pl.LightningModule):
         with torch.no_grad():
             self.activation.clear()
             outputs = self.model(**inputs)
-            cache = self.activation['layer_{self.layer_num}_attn'][1]
+            cache = self.activation[f'layer_{self.layer_num}_attn'][1]
             logits = outputs.logits
 
         lens_logits = self.forward(cache)

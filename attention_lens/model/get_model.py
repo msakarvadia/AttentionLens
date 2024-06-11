@@ -33,7 +33,7 @@ from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
 #     return model
 
 def get_model(
-        model_name: str = "gpt2", device: Union[str, torch.device] = "cpu"
+        model_name: str = "gpt2", device: Union[str, torch.device] = "cuda"
 ) -> AutoModelForCausalLM:
     """Loads and returns a pre-trained model from the Hugging Face Transformers library by the given ''name''.
     
