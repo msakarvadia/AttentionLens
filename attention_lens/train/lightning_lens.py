@@ -35,9 +35,12 @@ class LightningLens(pl.LightningModule):
         #print(self.model.config.bos_token_id)
         self.layer_num = layer_num
 
+        if self.model.lm_head.bias == None:
+            self.bias = torch.zeros(self.model.config.vocab_size)
+
         self.attn_lens = lens_cls(
-            unembed=self.model.lm_head.weight,
-            bias=self.model.transformer.h[self.layer_num].attn.c_proj.bias,
+            unembed=self.model.lm_head.weight.T,
+            bias=self.bias,
             n_head=self.model.config.num_attention_heads,
             d_model=self.model.config.hidden_size,
             d_vocab=self.model.config.vocab_size,
@@ -78,7 +81,6 @@ class LightningLens(pl.LightningModule):
         """
         inputs = list()
         #inputs.append(cache[self.hook_id])
-        print(cache.shape)
         inputs.append(cache)
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
@@ -104,9 +106,7 @@ class LightningLens(pl.LightningModule):
         with torch.no_grad():
             outputs = self.model(**inputs)
             cache = self.model.transformer.h[self.layer_num].attn.head_out
-            print(cache.shape)
             logits = outputs.logits
-
         lens_logits = self.forward(cache)
         loss = self.kl_loss(logits, lens_logits)
         self.log("train_loss", loss, prog_bar=True)
