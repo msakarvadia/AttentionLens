@@ -162,7 +162,6 @@ torchvision==0.15.2
 tornado==6.3.3
 tqdm==4.65.0
 traitlets==5.9.0
-transformer-lens @ git+https://github.com/neelnanda-io/TransformerLens.git@218ebd6f491f47f5e2f64e4c4327548b60a093eb
 transformers
 typeguard==3.0.2
 typeshed-client==2.3.0

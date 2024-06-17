@@ -42,23 +42,10 @@ class LightningLens(pl.LightningModule):
             d_model=self.model.config.hidden_size,
             d_vocab=self.model.config.vocab_size,
         )
-
-        self.activation = {}
-        self.register_hooks(self.model, self.get_activation)
-
         #self.hook_name = "result"
         self.lr = lr
         #self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
         #self.attention_layer = self.activation['layer_{self.layer_num}_attn'][1]
-
-    def get_activation(self, name):
-        def hook(model, input, output):
-            self.activation[name] = output[1]
-        return hook
-    
-    def register_hooks(self, model, hook_func):
-        for idx, layer in enumerate(model.transformer.h):
-            layer.attn.register_forward_hook(hook_func(f"layer_{idx}_attn"))
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         kldiv = torch.nn.KLDivLoss(reduction="batchmean", log_target=True)
@@ -91,6 +78,7 @@ class LightningLens(pl.LightningModule):
         """
         inputs = list()
         #inputs.append(cache[self.hook_id])
+        print(cache.shape)
         inputs.append(cache)
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
@@ -107,8 +95,6 @@ class LightningLens(pl.LightningModule):
         #NOTE: Had to use 'padding = true'
         inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, padding=True, return_tensors='pt')
 
-        self.register_hooks(self.model, self.get_activation)
-
         # with torch.no_grad():
         #     # only cache required hooks for lens
         #     logits, cache = self.model.run_with_cache(
@@ -116,9 +102,9 @@ class LightningLens(pl.LightningModule):
         #     )
 
         with torch.no_grad():
-            self.activation.clear()
             outputs = self.model(**inputs)
-            cache = self.activation[f'layer_{self.layer_num}_attn'][1]
+            cache = self.model.transformer.h[self.layer_num].attn.head_out
+            print(cache.shape)
             logits = outputs.logits
 
         lens_logits = self.forward(cache)
