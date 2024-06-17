@@ -3,12 +3,12 @@ from __future__ import annotations
 import lightning.pytorch as pl
 import torch
 import torch.nn.functional as F
-#import transformer_lens as tlens
-#from transformer_lens import HookedTransformer
+
+# import transformer_lens as tlens
+# from transformer_lens import HookedTransformer
 
 from attention_lens.lens import Lens
 from attention_lens.model.get_model import get_model
-
 
 
 class LightningLens(pl.LightningModule):
@@ -22,7 +22,9 @@ class LightningLens(pl.LightningModule):
     ):
         super().__init__(**kwargs)
         self.model_name = model_name
-        self.model, self.tokenizer = get_model(model_name=self.model_name, device=self.device)
+        self.model, self.tokenizer = get_model(
+            model_name=self.model_name, device=self.device
+        )
         if isinstance(lens_cls, str):
             lens_cls = Lens.get_lens(lens_cls)
         if isinstance(lens_cls, Lens):
@@ -31,8 +33,8 @@ class LightningLens(pl.LightningModule):
                 "string corresponding to the class (check the ``Lens.registry``). Available ``Lens`` objects are:"
                 f"{list(Lens.registry.keys())}"
             )
-        
-        #print(self.model.config.bos_token_id)
+
+        # print(self.model.config.bos_token_id)
         self.layer_num = layer_num
 
         if self.model.lm_head.bias == None:
@@ -45,10 +47,10 @@ class LightningLens(pl.LightningModule):
             d_model=self.model.config.hidden_size,
             d_vocab=self.model.config.vocab_size,
         )
-        #self.hook_name = "result"
+        # self.hook_name = "result"
         self.lr = lr
-        #self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
-        #self.attention_layer = self.activation['layer_{self.layer_num}_attn'][1]
+        # self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
+        # self.attention_layer = self.activation['layer_{self.layer_num}_attn'][1]
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         kldiv = torch.nn.KLDivLoss(reduction="batchmean", log_target=True)
@@ -80,7 +82,7 @@ class LightningLens(pl.LightningModule):
 
         """
         inputs = list()
-        #inputs.append(cache[self.hook_id])
+        # inputs.append(cache[self.hook_id])
         inputs.append(cache)
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
@@ -88,14 +90,22 @@ class LightningLens(pl.LightningModule):
 
     def training_step(self, train_batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
         prompt = train_batch["text"]
-        #tokens = self.model.to_tokens(prompt)
+        # tokens = self.model.to_tokens(prompt)
 
-        prompt_tokens = self.tokenizer(prompt, return_tensors = 'pt', padding=True, truncation=True)
-        prompt_length = prompt_tokens['input_ids'].shape[1]
+        prompt_tokens = self.tokenizer(
+            prompt, return_tensors="pt", padding=True, truncation=True
+        )
+        prompt_length = prompt_tokens["input_ids"].shape[1]
         max_length = prompt_length + 1
 
-        #NOTE: Had to use 'padding = true'
-        inputs = self.tokenizer(prompt, max_length=max_length, truncation=True, padding=True, return_tensors='pt')
+        # NOTE: Had to use 'padding = true'
+        inputs = self.tokenizer(
+            prompt,
+            max_length=max_length,
+            truncation=True,
+            padding=True,
+            return_tensors="pt",
+        )
 
         # with torch.no_grad():
         #     # only cache required hooks for lens

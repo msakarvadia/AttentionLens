@@ -12,7 +12,6 @@ flowchart LR
 ```
 """
 
-
 from attention_lens.lens.base import Lens
 from attention_lens.lens.registry.lensA import LensA
 

@@ -20,7 +20,7 @@ def train_lens(
     trainer = pl.Trainer(
         # strategy="ddp_find_unused_parameters_true",
         # accelerator="auto",
-        accelerator="cpu", # TODO: Parameterize this via function arg.
+        accelerator="cpu",  # TODO: Parameterize this via function arg.
         precision=training_precision,
         max_epochs=1,
         num_nodes=config.num_nodes,

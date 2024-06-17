@@ -2,6 +2,7 @@ import torch.types
 
 from typing import Union
 from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
+
 # from transformer_lens import (
 #     HookedTransformer,
 #     HookedTransformerConfig,
@@ -32,18 +33,19 @@ from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer
 #     print("lens created on device: ", device)
 #     return model
 
+
 def get_model(
-        model_name: str = "gpt2", device: Union[str, torch.device] = "cuda"
+    model_name: str = "gpt2", device: Union[str, torch.device] = "cuda"
 ) -> AutoModelForCausalLM:
     """Loads and returns a pre-trained model from the Hugging Face Transformers library by the given ''name''.
-    
+
     Args:
         model_name (str): The name of the pre-trained model.
         device (Union[str, torch.device]): The device to train on.
-    
+
     Examples:
         >>> model = get_model(model_name="gpt2")
-        
+
     Returns:
         The pre-trained model.
     """
