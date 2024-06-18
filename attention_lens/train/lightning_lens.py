@@ -38,7 +38,7 @@ class LightningLens(pl.LightningModule):
         self.layer_num = layer_num
 
         if self.model.lm_head.bias == None:
-            self.bias = torch.zeros(self.model.config.vocab_size)
+            self.bias = torch.zeros(self.model.config.vocab_size).to(self.device)
 
         self.attn_lens = lens_cls(
             unembed=self.model.lm_head.weight.T,
@@ -94,7 +94,7 @@ class LightningLens(pl.LightningModule):
 
         prompt_tokens = self.tokenizer(
             prompt, return_tensors="pt", padding=True, truncation=True
-        )
+        ).to(self.device)
         prompt_length = prompt_tokens["input_ids"].shape[1]
         max_length = prompt_length + 1
 
@@ -105,7 +105,7 @@ class LightningLens(pl.LightningModule):
             truncation=True,
             padding=True,
             return_tensors="pt",
-        )
+        ).to(self.device)
 
         # with torch.no_grad():
         #     # only cache required hooks for lens
