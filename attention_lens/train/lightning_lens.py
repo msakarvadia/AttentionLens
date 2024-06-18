@@ -3,10 +3,6 @@ from __future__ import annotations
 import lightning.pytorch as pl
 import torch
 import torch.nn.functional as F
-
-# import transformer_lens as tlens
-# from transformer_lens import HookedTransformer
-
 from attention_lens.lens import Lens
 from attention_lens.model.get_model import get_model
 
@@ -14,7 +10,7 @@ from attention_lens.model.get_model import get_model
 class LightningLens(pl.LightningModule):
     def __init__(
         self,
-        model_name: str,  # TODO: Add support for custom ``HookedTransformers``.
+        model_name: str,
         lens_cls: type[Lens] | str,
         layer_num: int,
         lr: float = 1e-3,
@@ -61,8 +57,6 @@ class LightningLens(pl.LightningModule):
         loss = kldiv(k_lens_out, k_logits)
         return loss
 
-    ######################################################################################################
-
     def setup(self, stage) -> None:
         # TODO: There was a concern about how models were trained in distributed systems. Lightning does some
         #       additional setup in this setting, but `__init__` is only called on the master CPU. So, `self.model`
@@ -107,12 +101,6 @@ class LightningLens(pl.LightningModule):
             return_tensors="pt",
         ).to(self.device)
 
-        # with torch.no_grad():
-        #     # only cache required hooks for lens
-        #     logits, cache = self.model.run_with_cache(
-        #         tokens, names_filter=self.hook_id, remove_batch_dim=False
-        #     )
-
         with torch.no_grad():
             outputs = self.model(**inputs)
             cache = self.model.transformer.h[self.layer_num].attn.head_out
@@ -121,7 +109,6 @@ class LightningLens(pl.LightningModule):
         loss = self.kl_loss(logits, lens_logits)
         self.log("train_loss", loss, prog_bar=True)
         # my_dict = {"train_loss":loss}
-        # wandb.log(my_dict, step=trainer.global_step)
         return loss
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
