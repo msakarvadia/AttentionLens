@@ -6,7 +6,6 @@ from attention_lens.model.get_model import get_model
 # from attention_lens.train.train_pl import LightningLens
 # import attention_lens.train as AL
 import torch
-import transformer_lens.utils as utils
 import argparse
 import numpy as np
 
@@ -47,7 +46,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--model",
-    default="gpt2",  # Test to see if this makes the code work
+    default="gpt2",  # TODO: Test to see if this makes the code work
     type=str,
     help="model type that the lens corresponds to",
 )
@@ -117,7 +116,4 @@ def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
         print("______________________")
 
 
-# for prompt in prompts:
-#    print("Prompt: ", prompt)
-#    interpret_layer(prompt, attn_lens)
 interpret_layer(args.prompt, attn_lens)
