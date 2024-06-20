@@ -18,9 +18,9 @@ def get_args() -> argparse.Namespace:
     parser.add_argument("--num_nodes", default=1, type=int)
     parser.add_argument(
         "--model_name",
-        default="gpt2-small",
+        default="gpt2",
         type=str,
-        choices=["gpt2-small", "gpt2-large"],
+        choices=["gpt2"],
     )
     parser.add_argument(
         "--mixed_precision",

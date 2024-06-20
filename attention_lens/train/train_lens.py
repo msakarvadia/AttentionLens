@@ -18,7 +18,7 @@ def train_lens(
     # accelerator = "gpu" if torch.cuda.is_available() else "cpu"
     training_precision = "16-mixed" if config.mixed_precision else 32
     trainer = pl.Trainer(
-        # strategy="ddp_find_unused_parameters_true",
+        strategy="ddp_find_unused_parameters_true",
         accelerator="auto",
         precision=training_precision,
         max_epochs=1,

@@ -1,11 +1,12 @@
 #!/bin/bash 
-#PBS -l select=10
-#PBS -l walltime=12:00:00
-#PBS -q ATPESC_BigRun
+#PBS -l select=2
+#PBS -l walltime=1:00:00
+#PBS -q debug
 #PBS -l filesystems=home:grand:eagle
-#PBS -A ATPESC2023
+#PBS -A SuperBERT
 
-cd "/lus/grand/projects/SuperBERT/mansisak/AttentionLens/attention_lense"
+#cd "/lus/grand/projects/SuperBERT/mansisak/AttentionLens/attention_lense"
+#cd "~/AttentionLens/attention_lense"
 echo "working dir: "
 pwd
 
@@ -50,7 +51,8 @@ fi
 PRELOAD="source /etc/profile ; "
 PRELOAD+="module load conda ; "
 PRELOAD+="conda activate ; "
-PRELOAD+="conda activate /home/mansisak/.conda/envs/attnlens ; "
+#PRELOAD+="conda activate /home/mansisak/.conda/envs/attnlens ; "
+PRELOAD+="conda activate /home/pettyjohnjn/.conda/envs/AttentionLens ; "
 # PRELOAD+="module load conda/pytorch ; "
 # PRELOAD+="conda activate /lus/theta-fs0/projects/SuperBERT/jgpaul/envs/pytorch-1.9.1-cu11.3 ; "
 #PRELOAD+="module load conda ; "
@@ -80,7 +82,7 @@ fi
 echo "ckpt dir: "$ckpt
 echo "layer num: "$l_num
 echo "model name: "$model_name
-CMD="train/train_pl.py --num_nodes $NNODES --model_name $model_name  --checkpoint_dir $ckpt --layer_number $l_num"
+CMD="train/train_lens.py --num_nodes $NNODES --model_name $model_name  --checkpoint_dir $ckpt --layer_number $l_num"
 
 RANK=0
 for NODE in $RANKS; do

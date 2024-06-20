@@ -1,0 +1,10 @@
+working dir: 
+/home/pettyjohnjn
+Master Rank: +x3006c0s25b0n0.hsn.cm.polaris.alcf.anl.gov
+ckpt dir: 
+layer num: 
+model name: 
+Training Command:  source /etc/profile ; module load conda ; conda activate ; conda activate /home/pettyjohnjn/.conda/envs/AttentionLens ; export OMP_NUM_THREADS=8 ; source ~/.bashrc ; export OMP_NUM_THREADS=8 ;  python -m torch.distributed.run --nnodes=2 --nproc_per_node=auto --max_restarts 0 --master_port=1222 --master_addr=x3006c0s25b0n0.hsn.cm.polaris.alcf.anl.gov   --node_rank=0  train/train_lens.py --num_nodes 2 --model_name   --checkpoint_dir  --layer_number   
+Launching rank 0 on remote node x3006c0s25b0n0.hsn.cm.polaris.alcf.anl.gov
+Training Command:  source /etc/profile ; module load conda ; conda activate ; conda activate /home/pettyjohnjn/.conda/envs/AttentionLens ; export OMP_NUM_THREADS=8 ; source ~/.bashrc ; export OMP_NUM_THREADS=8 ;  python -m torch.distributed.run --nnodes=2 --nproc_per_node=auto --max_restarts 0 --master_port=1222 --master_addr=x3006c0s25b0n0.hsn.cm.polaris.alcf.anl.gov   --node_rank=1  train/train_lens.py --num_nodes 2 --model_name   --checkpoint_dir  --layer_number   
+Launching rank 1 on remote node x3006c0s25b1n0.hsn.cm.polaris.alcf.anl.gov

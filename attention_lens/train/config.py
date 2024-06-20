@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
-from transformer_lens.loading_from_pretrained import OFFICIAL_MODEL_NAMES
-
 
 @dataclass
 class TrainConfig:
