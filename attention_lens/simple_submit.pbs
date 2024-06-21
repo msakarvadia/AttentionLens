@@ -1,12 +1,15 @@
 #!/bin/bash 
 #PBS -l select=2
-#PBS -l walltime=1:00:00
+#PBS -l walltime=00:15:00
 #PBS -q debug
 #PBS -l filesystems=home:grand:eagle
 #PBS -A SuperBERT
 
-#cd "/lus/grand/projects/SuperBERT/mansisak/AttentionLens/attention_lense"
-#cd "~/AttentionLens/attention_lense"
+echo "working dir:"
+pwd
+
+# cd "/lus/grand/projects/SuperBERT/mansisak/AttentionLens/attention_lense"
+cd "/home/pettyjohnjn/AttentionLens/attention_lens"
 echo "working dir: "
 pwd
 
@@ -49,6 +52,7 @@ fi
 
 # Commands to run prior to the Python script for setting up the environment
 PRELOAD="source /etc/profile ; "
+PRELOAD+="module use/soft/modulefiles"
 PRELOAD+="module load conda ; "
 PRELOAD+="conda activate ; "
 #PRELOAD+="conda activate /home/mansisak/.conda/envs/attnlens ; "
