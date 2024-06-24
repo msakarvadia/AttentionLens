@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import lightning.pytorch as pl
@@ -20,7 +21,9 @@ class LightningLens(pl.LightningModule):
     ):
         super().__init__(**kwargs)
         self.model_name = model_name
-        self.model, self.tokenizer = get_model(model_name=self.model_name, device=self.device)
+        self.model, self.tokenizer = get_model(
+            model_name=self.model_name, device=self.device
+        )
         if isinstance(lens_cls, str):
             lens_cls = Lens.get_lens(lens_cls)
         if isinstance(lens_cls, Lens):
@@ -44,9 +47,30 @@ class LightningLens(pl.LightningModule):
         self.hook_name = "result"
         self.layer_num = layer_num
         self.lr = lr
-        #self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
+        # self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
+        r"""
+        Compute the Kullback-Leibler divergence between tensors.
+
+        Quantifies the difference between the probability distribution of the model's
+        output versus the probability distribution of the attention lens.
+
+        $$
+            D_{KL} (\text{logits} \Vert \text{lens\_logits})
+        $$
+
+        Args:
+            logits (torch.Tensor[d_vocab]): A probability distribution of the model's outputs.
+            lens_logits (torch.Tensor[d_vocab]): The output of the AttentionLens model
+                acting on the entire layer from the attention mechanism.
+
+
+        Returns:
+            loss: (torch.Tensor[bsz]): Returns difference between logits and lens_logits
+
+        """
+
         kldiv = torch.nn.KLDivLoss(reduction="batchmean", log_target=True)
         k_logits, k_lens_out = F.log_softmax(logits[:, -1, :], dim=-1), F.log_softmax(
             lens_logits[:, -1, :], dim=-1
@@ -58,37 +82,62 @@ class LightningLens(pl.LightningModule):
     ######################################################################################################
 
     def setup(self, stage) -> None:
+        """
+        Sets up the model and tokenizer during training setup.
+
+        Args:
+            stage: The stage of the training process.
+        """
         # TODO: There was a concern about how models were trained in distributed systems. Lightning does some
         #       additional setup in this setting, but `__init__` is only called on the master CPU. So, `self.model`
         #       and `self.hooked_model` are separate desppite being initialized identically. We need to confirm if
         #       they must be named differently for Lightning to work.
         self.model, self.tokenizer = get_model(
-            model_name=self.model_name, 
+            model_name=self.model_name,
             device=self.trainer.strategy.root_device,
         )
 
-    def forward(self, cache) -> torch.Tensor:
-        """
+    def forward(self, head_out) -> torch.Tensor:
+        r"""
+        Compute a forward pass through the Attention Lens
+
+        Takes the hook information of an entire layer of the attention mechanism, and
+        computes the forward pass through that layer of Transformer Lens models.
 
         Args:
-            cache (dict[str, torch.Tensor]): A mapping from output results to a Tensor (part of ``HookedTransformer``).
+            head_out (torch.Tensor[bsz, q_len, d_model]): The hooked information of an
+                entire layer of the attention mechanism.
 
         Returns:
+            lens_out (torch.Tensor[bsz, d_vocab]): The prediction of the attention lens
+                models for that layer.
 
         """
         inputs = list()
-        inputs.append(cache)
+        inputs.append(head_out)
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
         return self.attn_lens(inputs)
 
     def training_step(self, train_batch: torch.Tensor, batch_idx: int) -> torch.Tensor:
+        """
+        Defines a single step in the training loop. Takes in an entire batch and computes
+        the KL-loss for that batch.
+
+        Args:
+            train_batch (torch.Tensor): The batch (bsz) of data for the current training
+            step.
+            batch_idx (int): The index of the batch.
+
+        Returns:
+            torch.Tensor: The loss for the current training step. 
+        """
         prompt = train_batch["text"]
-        #tokens = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True).to(self.device)
+        # tokens = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True).to(self.device)
         inputs = self.tokenizer(
             prompt,
-            truncation = True,
-            padding = True,
+            truncation=True,
+            padding=True,
             return_tensors="pt",
         ).to(self.device)
 
@@ -105,6 +154,12 @@ class LightningLens(pl.LightningModule):
         return loss
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
+        """
+        Configures the optimizer for training.
+
+        Returns:
+            torch.optim.Optimizer: The optimizer for training.
+        """
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 

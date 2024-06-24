@@ -15,15 +15,17 @@ class LensA(Lens):
             i.bias = nn.Parameter(bias.clone())
 
     def forward(self, input_tensor):
-        r"""
-        This is optimizing $f(x) = \sum_{...} ...$ (TODO)
+        """
+        Performs a forward pass through the LensA model.
 
         Args:
-            input_tensor ():
+            input_tensor (torch.Tensor): Input tensor of shape (batch_size, pos, n_head, d_model).
 
         Returns:
-
+            torch.tensor: Output tensor of shape (batch_size, pos, d_vocab) after processing through
+            the linear layers and summing across the attention heads.
         """
+
         batch_size, pos, n_head, d_model = input_tensor.size()
 
         output_tensors = torch.empty(
