@@ -8,6 +8,10 @@ from attention_lens.train.lightning_lens import LightningLens
 from attention_lens.train.train_lens import train_lens
 from load_args import get_args
 
+from logging import basicConfig
+
+basicConfig(format="%(levelname)s:%(message)s")
+
 
 def main(args: argparse.Namespace):
     arg_dict = vars(args)

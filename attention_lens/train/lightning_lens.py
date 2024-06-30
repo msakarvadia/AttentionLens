@@ -44,10 +44,8 @@ class LightningLens(pl.LightningModule):
             d_vocab=self.model.config.vocab_size,
         )
 
-        self.hook_name = "result"
         self.layer_num = layer_num
         self.lr = lr
-        # self.hook_id = tlens.utils.get_act_name(self.hook_name, self.layer_num)
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         r"""
@@ -133,7 +131,6 @@ class LightningLens(pl.LightningModule):
             torch.Tensor: The loss for the current training step. 
         """
         prompt = train_batch["text"]
-        # tokens = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True).to(self.device)
         inputs = self.tokenizer(
             prompt,
             truncation=True,

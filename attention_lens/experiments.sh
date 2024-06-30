@@ -3,7 +3,7 @@
 for model_name in gpt2
 do
     echo $model_name
-    ckpt_dir="/home/pettyjohnjn/TL_AttnLens/checkpoint/${model_name}/ckpt_"
+    ckpt_dir="/home/pettyjohnjn/AttentionLens/checkpoint/${model_name}/ckpt_"
     job_name="${model_name}_attnlen_"
 
     if [ $model_name == "gpt2" ];then 
@@ -15,7 +15,7 @@ do
     for (( layer=0; layer<$num_layers; layer++ ))
     do
         echo $layer
-        ./simple_submit.pbs  -v "l_num=${layer}" -N ${job_name}${layer}
+        qsub -v "ckpt=${ckpt_dir}${layer}, l_num=${layer}, model_name=$model_name" -N ${job_name}${layer} simple_submit.pbs 
     done
 
 done
