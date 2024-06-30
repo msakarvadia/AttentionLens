@@ -118,8 +118,7 @@ torchmetrics==1.1.1
 torchvision==0.15.2
 tqdm==4.66.1
 traitlets==5.9.0
-transformer-lens @ git+https://github.com/neelnanda-io/TransformerLens.git@218ebd6f491f47f5e2f64e4c4327548b60a093eb
-transformers==4.36.0
+transformers @ git+https://github.com/pettyjohnjn/transformers.git@branch-name
 triton==2.0.0
 typeguard==3.0.2
 typing_extensions==4.7.1

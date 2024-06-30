@@ -175,6 +175,7 @@ torchvision==0.15.2
 tornado==6.3.3
 tqdm==4.65.0
 traitlets==5.9.0
+transformers @ git+https://github.com/pettyjohnjn/transformers.git@branch-name
 triton==2.0.0
 typeguard==3.0.2
 typeshed-client==2.3.0
