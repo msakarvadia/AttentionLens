@@ -3,8 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
-from transformer_lens.loading_from_pretrained import OFFICIAL_MODEL_NAMES
-
 
 @dataclass
 class TrainConfig:
@@ -25,7 +23,7 @@ class TrainConfig:
     stopping_patience: int = field(default=2)
 
     # AttentionLens-specific arguments
-    model_name: str = field(default="gpt2-small")  # Choices are `OFFICIAL_MODEL_NAMES`
+    model_name: str = field(default="gpt2")
     layer_number: int = field(default=0)
 
     def __post_init__(self):

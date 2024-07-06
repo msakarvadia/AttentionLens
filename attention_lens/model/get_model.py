@@ -1,32 +1,30 @@
 import torch.types
 
 from typing import Union
-from transformer_lens import (
-    HookedTransformer,
-    HookedTransformerConfig,
-    FactoredMatrix,
-    ActivationCache,
-)
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 def get_model(
-    model_name: str = "gpt2-small", device: Union[str, torch.types.Device] = "cuda"
-) -> HookedTransformer:
-    """Loads and returns a pre-trained lens from the TransformerLens library by the given ``name``.
+    model_name: str = "gpt2", device: Union[str, torch.types.Device] = "cuda"
+) -> AutoModelForCausalLM:
+    """Loads and returns a model and tokenizer from the modified Hugging Face Transformers library.
 
     Args:
-        model_name (str): The name of the pre-trained lens.
+        model_name (str): The name of the pre-trained model.
         device (Union[str, torch.types.Device]): The device to train on.
 
     Examples:
-        >>> lens = get_model(lens="gpt2-small")
+        >>> model, tokenizer = get_model("gpt2")
 
     Returns:
-        The pre-trained lens with hooks.
+        The light-weight hooked model and tokenizer.
     """
-    # lens = HookedTransformer.from_pretrained(model_name)
-    model = HookedTransformer.from_pretrained(model_name, device=device)
-    model.cfg.use_attn_result = True
+    model = AutoModelForCausalLM.from_pretrained(model_name)
+    model.to(device)
+    
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.pad_token = tokenizer.eos_token
 
-    print("lens created on device: ", device)
-    return model
+
+    print("Model initialized on device: ", device)
+    return model, tokenizer

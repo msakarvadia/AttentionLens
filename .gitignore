@@ -2,6 +2,7 @@
 *.egg-info/
 attention_lens/lightning_logs/
 checkpoint/
-
+attention_lens/simple_submit.pbs.e*
+attention_lens/simple_submit.pbs.o*
 # IDE-specific directories to ignore.
 .idea/
