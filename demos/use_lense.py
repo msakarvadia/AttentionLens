@@ -6,15 +6,21 @@ from attention_lens.model.get_model import get_model
 # from attention_lens.train.train_pl import LightningLens
 # import attention_lens.train as AL
 import torch
-import transformer_lens.utils as utils
 import argparse
 import numpy as np
 
 #### SET UP USER ARGS
 parser = argparse.ArgumentParser()
+
+parser.add_argument(
+    "--model",
+    default="gpt2",
+    type=str,
+    help="model that the lens uses"
+)
 parser.add_argument(
     "--lense_loc",
-    default="/lus/grand/projects/SuperBERT/mansisak/extracted_lenses/gpt2-small/attnlens-layer-9-epoch=00-step=2795-train_loss=0.03.ckpt",
+    default="/home/pettyjohnjn/AttentionLens/extracted_lens2/attnlens-layer-10-epoch=00-step=980-train_loss=2.29.ckpt",
     type=str,
     help="path to dir containing all latest ckpts for a lens",
 )
@@ -26,13 +32,13 @@ parser.add_argument(
 )
 parser.add_argument(
     "--lens",
-    default="gpt2-small",
-    choices=["gpt2-small", "gpt2-large"],
+    default="gpt2",
+    choices=["gpt2"],
     type=str,
     help="lens that the lens corresponds to",
 )
 parser.add_argument(
-    "--layer_num", default=9, type=int, help="layer number that lens corresponds to"
+    "--layer_num", default=0, type=int, help="layer number that lens corresponds to"
 )
 parser.add_argument(
     "--num_attn_heads",
@@ -53,7 +59,7 @@ if args.cpu:
     device = "cpu"
 
 # get lens
-model = get_model(args.model, device=device)
+model, tokenizer = get_model(args.model, device=device)
 
 attn_lens = torch.load(args.lense_loc, map_location=torch.device(device))
 
@@ -69,47 +75,56 @@ prompts = [
 
 def interpret_layer(prompt, attn_lens, k_tokens=args.k_tokens):
     print(prompt)
-    tokens = model.to_tokens(prompt)
+    inputs = tokenizer(
+        prompt,
+        truncation=True,
+        padding=True,
+        return_tensors="pt"
+    )
 
     with torch.no_grad():
-        logits, cache = model.run_with_cache(tokens, remove_batch_dim=False)
-        topk_token_preds = torch.topk(logits, args.k_tokens)
-        print("Model's predictions: ", topk_token_preds[1].shape)
-        print(model.to_string(topk_token_preds[1][0][-1].reshape(args.k_tokens, 1)))
+        outputs = model(**inputs)
+        logits = outputs.logits
+        cache = model.transformer.h[args.layer_num].attn.head_out
 
-    inputs = []
-    hook_name = "result"
-    hook_id = utils.get_act_name(hook_name, args.layer_num)
-    inputs.append(cache[hook_id])
+        topk_token_preds = torch.topk(logits, args.k_tokens)
+        #print(topk_token_preds[1].shape)
+        pred = tokenizer.batch_decode(topk_token_preds.indices[0, -1, :], skip_special_tokens=True)
+        print("Model's predictions: ", pred)
+
+    inputs=[]
+    inputs.append(cache)
     input_tensor = torch.stack(inputs)
 
     for head in range(args.num_attn_heads):
-        print("Head: ", head)
-        print("projecting with Lense:")
-        layer_head = attn_lens.lenses[0].linears[head]
+        layer_head = attn_lens.linears[head]
 
-        # Count number of trainable parameters in lens
         attn_lens_parameters = filter(
             lambda p: p.requires_grad, layer_head.parameters()
         )
+
         params = sum([np.prod(p.size()) for p in attn_lens_parameters])
-        print("number of trainable parameters in lens: ", params)
+        #print("number of trainable parameters in lens: " params)
 
         projected = layer_head(inputs[0][0][-1][head])
-
         topk_token_vals, topk_token_preds = torch.topk(projected, k_tokens)
-        print(model.to_string(topk_token_preds.reshape(k_tokens, 1)))
+        projected_tokens = tokenizer.batch_decode(topk_token_preds)
+        #print("Projected tokens: ", projected_tokens)
 
-        print("projecting with lens's unembedding: ")
-        logits = model.unembed(inputs[0][:, :, head, :])
+        # #print(f'LOGITS: {logits.shape}')
 
-        topk_token_preds = torch.topk(logits, args.k_tokens)
-        print(model.to_string(topk_token_preds[1][0][-1].reshape(args.k_tokens, 1)))
+        # logits_unembed = model.lm_head(inputs[0][:, :, head, :])
+        # topk_token_preds = torch.topk(logits, args.k_tokens)
+        # projected_tokens = tokenizer.batch_decode(topk_token_preds.indices[0, -1, :])
+        # #print("Unembedding tokens: ", projected_tokens)
 
-        print("______________________")
+        W_E = model.transformer.wte.weight
+        projected_cache = torch.matmul(cache[:,:,head,:], W_E.T)
+        topk_token_preds = torch.topk(projected_cache, args.k_tokens)
+        projected_tokens = tokenizer.batch_decode(topk_token_preds.indices[0, -1, :])
+        print("Projected Tokens: ", projected_tokens)
+
+        print("___________________")
 
 
-# for prompt in prompts:
-#    print("Prompt: ", prompt)
-#    interpret_layer(prompt, attn_lens)
 interpret_layer(args.prompt, attn_lens)
