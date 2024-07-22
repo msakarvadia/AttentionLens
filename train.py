@@ -1,6 +1,6 @@
 import argparse
 
-from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint
+from lightning.pytorch.callbacks import EarlyStopping, ModelCheckpoint, DeviceStatsMonitor
 
 from attention_lens.data.get_data_pl import DataModule
 from attention_lens.train.config import TrainConfig
@@ -29,6 +29,7 @@ def main(args: argparse.Namespace):
     )
     checkpoint_callback = ModelCheckpoint(
         # TODO change the max num of checkpoints
+        save_last = True,
         save_top_k=config.max_checkpoint_num,
         monitor="train_loss",
         mode="min",
@@ -36,11 +37,12 @@ def main(args: argparse.Namespace):
         filename=filename_template,
         every_n_train_steps=config.num_steps_per_checkpoint,
     )
+    device_stats = DeviceStatsMonitor()
 
     callbacks = []
     lens = LightningLens(config.model_name, "lensa", config.layer_number, config.lr)
     data = DataModule()
-    train_lens(lens, data, config, callbacks=[checkpoint_callback, early_stop_callback])
+    train_lens(lens, data, config, callbacks=[checkpoint_callback, early_stop_callback, device_stats])
 
 
 if __name__ == "__main__":

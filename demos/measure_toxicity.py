@@ -18,12 +18,12 @@ gpt2_model.to(device)
 
 # Define the tensor to inject
 inject_tensor = torch.zeros(1,1,768).to(device)
-
+inject_tensor = None
 # Specify the layer index for injection
-inject_layer = 11 
+inject_layer = 10
 
 # Specify the head index for injection
-inject_head = 11 #
+inject_head = 4 #
 
 # Function to generate text using GPT-2 without including the prompt
 def generate_text(prompt, max_new_tokens=20):

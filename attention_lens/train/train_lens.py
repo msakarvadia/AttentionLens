@@ -60,7 +60,7 @@ def train_lens(
         callbacks=callbacks,
         # callbacks=[early_stop_callback, logging_checkpoint, latest_checkpoint],
         # flush_logs_every_n_steps=100,
-        # log_every_n_steps=1,
+        #log_every_n_steps=50,
         # logger=csv_logger)
         # logger=wandb_logger)
         # TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')
@@ -74,9 +74,8 @@ def train_lens(
         )
 
         if config.checkpoint_dir.exists():
-            layer_identifier = f"layer-{config.layer_number}"
             files = config.checkpoint_dir.glob("*.ckpt")
-            files = [file for file in files if layer_identifier in file.name]
+            files = list(files)
             if files:
                 most_recent_file = max(files, key=lambda p: p.stat().st_ctime)
                 config.reload_checkpoint = most_recent_file
