@@ -17,14 +17,14 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument(
     "--ckpt_dir",
-    default="/home/pettyjohnjn/AttentionLens/checkpoint2/gpt2/ckpt_10",
+    default="/home/pettyjohnjn/AttentionLens/checkpoint3/gpt2/ckpt_11/",
     type=str,
     help="path to dir containing all latest ckpts for a lens",
 )
 
 parser.add_argument(
     "--save_dir",
-    default="/home/pettyjohnjn/AttentionLens/extracted_lens2/",
+    default="/home/pettyjohnjn/AttentionLens/extracted_lens3/layer_11",
     type=str,
     help="path to dir where script should save all extracted lenses",
 )
