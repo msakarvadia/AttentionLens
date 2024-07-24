@@ -11,3 +11,5 @@ attention_lens/b_U.pt
 attention_lens/core.*
 attention_lens/gpt2_attnlen_*
 extracted_lens*
+W_U.pt
+b_U.pt
