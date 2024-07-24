@@ -11,7 +11,7 @@ do
         declare -i num_layers=36
     fi
 
-    for (( layer=8; layer<$num_layers; layer++ ))
+    for (( layer=0; layer<8; layer++ ))
     do
         echo $layer
         ckpt_dir="/home/pettyjohnjn/AttentionLens/checkpoint3/${model_name}/ckpt_"
