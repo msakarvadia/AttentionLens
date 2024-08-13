@@ -10,7 +10,7 @@
       
       
       
-        <link rel="next" href="reference/">
+        <link rel="next" href="getting_started/">
       
       
       <link rel="icon" href="assets/images/favicon.png">
@@ -239,7 +239,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="getting_started/index.md" class="md-tabs__link">
+        <a href="getting_started/" class="md-tabs__link">
           
   
   Getting Started
@@ -459,11 +459,95 @@
   
   
     <li class="md-nav__item">
-      <a href="getting_started/index.md" class="md-nav__link">
+      <a href="getting_started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Introduction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/polaris/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Running on Polaris
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configs and Args
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/lens_def/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Lens Definition
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="getting_started/train/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Training
   </span>
   
 
@@ -1068,9 +1152,10 @@
 
 <h1 id="welcome-to-attentionlens">Welcome to AttentionLens</h1>
 <p>Interpreting the latent space representations of attention head outputs for <em>Large Language Models</em> (LLMs).</p>
-<p>To train attention lense, navigate to the <code>train/</code> dir and run the command <code>python train_pl.py</code>.</p>
+<p>To train Attention Lens, navigate to the <code>AttentionLens/</code> directory and run the command <code>python train.py</code>. For examples on training Attention Lens
+with PBS scheduler, navigate to the <code>AttentionLens/attention_lens/</code> and run the command <code>./experiments.sh</code>. For more information on Attention Lens, and training, see <code>Getting Started</code>.</p>
 <p>PyTorch Lighting has been used to support distributed training, so you can also use <code>torch.distributed.run</code> to distribute training across nodes. More complete documentation is coming soon.</p>
-<p>Demos for how to use a lens to view the vocabulary latent space of a specific attention head can be found in the <code>demos/</code> dir. Again, better docs coming soon. <img alt="😄" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f604.svg" title=":smile:" /></p>
+<p>Demos for how to extract and use a lens to view the vocabulary latent space of a specific attention head can be found in the <code>demos/</code> directory. </p>
 <h2 id="installation">Installation</h2>
 <p>Requirements: python &gt;=3.7,&lt;3.11</p>
 <div class="language-shell highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/msakarvadia/AttentionLens.git
