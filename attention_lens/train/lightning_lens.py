@@ -34,18 +34,24 @@ class LightningLens(pl.LightningModule):
             )
 
         if self.model.lm_head.bias == None:
-            self.bias = torch.zeros(self.model.config.vocab_size).to(self.device)
+
+            #self.bias = torch.zeros(self.model.config.vocab_size).to(self.device)
+            self.bias = torch.load('b_U.pt').to(self.device)
+        
+        self.weights = torch.load('W_U.pt').to(self.device)
+        #self.weights = self.model.lm_head.weight.T
+        
+        self.layer_num = layer_num
+        self.lr = lr
 
         self.attn_lens = lens_cls(
-            unembed=self.model.lm_head.weight.T,
-            bias=self.bias,
+            unembed= self.weights,
+            bias= self.bias,
             n_head=self.model.config.num_attention_heads,
             d_model=self.model.config.hidden_size,
             d_vocab=self.model.config.vocab_size,
         )
 
-        self.layer_num = layer_num
-        self.lr = lr
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         r"""
@@ -95,7 +101,9 @@ class LightningLens(pl.LightningModule):
             device=self.trainer.strategy.root_device,
         )
 
-    def forward(self, head_out) -> torch.Tensor:
+
+    def forward(self, cache) -> torch.Tensor:
+
         r"""
         Compute a forward pass through the Attention Lens
 
@@ -103,7 +111,9 @@ class LightningLens(pl.LightningModule):
         computes the forward pass through that layer of Transformer Lens models.
 
         Args:
-            head_out (torch.Tensor[bsz, q_len, d_model]): The hooked information of an
+
+            cache (torch.Tensor[bsz, q_len, d_model]): The hooked information of an
+
                 entire layer of the attention mechanism.
 
         Returns:
@@ -112,7 +122,10 @@ class LightningLens(pl.LightningModule):
 
         """
         inputs = list()
-        inputs.append(head_out)
+
+        inputs.append(cache)
+        #print(cache.shape)
+
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
         return self.attn_lens(inputs)
@@ -157,6 +170,11 @@ class LightningLens(pl.LightningModule):
         Returns:
             torch.optim.Optimizer: The optimizer for training.
         """
+
+
+        print(f'Learning Rate: {self.lr}')
+
+
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
 

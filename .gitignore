@@ -1,8 +1,19 @@
 *__pycache__/
 *.egg-info/
 attention_lens/lightning_logs/
-checkpoint/
+
+checkpoint*
+
 attention_lens/simple_submit.pbs.e*
 attention_lens/simple_submit.pbs.o*
 # IDE-specific directories to ignore.
 .idea/
+
+attention_lens/W_U.pt
+attention_lens/b_U.pt
+attention_lens/core.*
+attention_lens/gpt2_attnlen_*
+extracted_lens*
+W_U.pt
+b_U.pt
+

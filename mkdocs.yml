@@ -8,8 +8,15 @@ nav:
   - Home: index.md
   - Getting Started:
     - Introduction: getting_started/index.md
+    - Running on Polaris: getting_started/polaris.md
+    - Configs and Args: getting_started/config.md
+    - Lens Definition: getting_started/lens_def.md
+    - Training: getting_started/train.md
   - API Reference: reference/
   - Publications: publications.md
+
+watch:
+  - attention_lens/
 
 theme:
   name: material

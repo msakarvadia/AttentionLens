@@ -60,7 +60,7 @@ def train_lens(
         callbacks=callbacks,
         # callbacks=[early_stop_callback, logging_checkpoint, latest_checkpoint],
         # flush_logs_every_n_steps=100,
-        # log_every_n_steps=1,
+        #log_every_n_steps=50,
         # logger=csv_logger)
         # logger=wandb_logger)
         # TODO(MS): eventually use the profile to find bottlenecks: profiler='simple')

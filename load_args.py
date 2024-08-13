@@ -6,7 +6,7 @@ def get_args() -> argparse.Namespace:
     # NOTE(MS): I copied these args from a different project so they might not be relavent anymore
     #### SET UP USER ARGS
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lr", default=1e-3, type=float)
+    parser.add_argument("--lr", default=1e-4, type=float)
     parser.add_argument("--epochs", default=3, type=int)
     parser.add_argument(
         "--max_checkpoint_num",
@@ -14,7 +14,7 @@ def get_args() -> argparse.Namespace:
         type=int,
         help="maximum number of ckpts to save",
     )
-    parser.add_argument("--batch_size", default=1, type=int)
+    parser.add_argument("--batch_size", default=4, type=int)
     parser.add_argument("--num_nodes", default=1, type=int)
     parser.add_argument(
         "--model_name",
