@@ -3,6 +3,7 @@
 for model_name in gpt2
 do
     echo $model_name
+
     job_name="${model_name}_attnlen_"
 
     if [ $model_name == "gpt2" ];then 

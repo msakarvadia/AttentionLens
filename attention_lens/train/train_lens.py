@@ -74,8 +74,9 @@ def train_lens(
         )
 
         if config.checkpoint_dir.exists():
+            layer_identifier = f"layer-{config.layer_number}"
             files = config.checkpoint_dir.glob("*.ckpt")
-            files = list(files)
+            files = [file for file in files if layer_identifier in file.name]
             if files:
                 most_recent_file = max(files, key=lambda p: p.stat().st_ctime)
                 config.reload_checkpoint = most_recent_file

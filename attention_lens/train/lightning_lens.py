@@ -34,6 +34,7 @@ class LightningLens(pl.LightningModule):
             )
 
         if self.model.lm_head.bias == None:
+
             #self.bias = torch.zeros(self.model.config.vocab_size).to(self.device)
             self.bias = torch.load('b_U.pt').to(self.device)
         
@@ -50,6 +51,7 @@ class LightningLens(pl.LightningModule):
             d_model=self.model.config.hidden_size,
             d_vocab=self.model.config.vocab_size,
         )
+
 
     def kl_loss(self, logits, lens_logits) -> torch.Tensor:
         r"""
@@ -99,7 +101,9 @@ class LightningLens(pl.LightningModule):
             device=self.trainer.strategy.root_device,
         )
 
+
     def forward(self, cache) -> torch.Tensor:
+
         r"""
         Compute a forward pass through the Attention Lens
 
@@ -107,7 +111,9 @@ class LightningLens(pl.LightningModule):
         computes the forward pass through that layer of Transformer Lens models.
 
         Args:
+
             cache (torch.Tensor[bsz, q_len, d_model]): The hooked information of an
+
                 entire layer of the attention mechanism.
 
         Returns:
@@ -116,8 +122,10 @@ class LightningLens(pl.LightningModule):
 
         """
         inputs = list()
+
         inputs.append(cache)
         #print(cache.shape)
+
         inputs = torch.stack(inputs)[-1]
         # TODO: Double check that we need to pass in the LAST token position.
         return self.attn_lens(inputs)
@@ -163,7 +171,9 @@ class LightningLens(pl.LightningModule):
             torch.optim.Optimizer: The optimizer for training.
         """
 
+
         print(f'Learning Rate: {self.lr}')
+
 
         optimizer = torch.optim.Adam(self.parameters(), lr=self.lr)
         return optimizer
